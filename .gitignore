@@ -1,0 +1,16 @@
+bin
+obj
+node_modules
+.vs
+*.user
+Cache
+FamiliarFaces
+src/Memory/*.db
+*.db-shm
+*.db-wal
+appsettings.Development.json
+/src/Memory/Upload
+publish
+Logs
+ffmpeg-*
+ffmpeg

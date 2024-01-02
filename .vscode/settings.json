@@ -1,0 +1,13 @@
+{
+    "tailwindCSS.includeLanguages": {
+        "fsharp": "html"
+    },
+    "tailwindCSS.experimental.classRegex": [
+        "class'[^\"]*\"([^\n]*)\"[^\n]*"
+    ],
+    "tailwindCSS.experimental.configFile": "./styles/tailwind.config.js",
+    "css.validate": false,
+    "editor.quickSuggestions": {
+        "strings": true
+    }
+}

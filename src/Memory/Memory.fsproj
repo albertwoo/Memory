@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ServerGarbageCollection>false</ServerGarbageCollection>
+		<AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<Compile Include="Utils.fs" />
+
+		<Compile Include="Options/*.fs" />
+
+		<Compile Include="Domain/*.fs" />
+		<Compile Include="Domain/Tag/*.fs" />
+		<Compile Include="Domain/Memory/*.fs" />
+		<Compile Include="Domain/Account/*.fs" />
+
+		<Compile Include="Services/DatabaseService.fs" />
+		<Compile Include="Services/FaceTagBackgroundService.fs" />
+		<Compile Include="Services/MemoryBackgroundService.fs" />
+
+		<Compile Include="Views/Utils.fs" />
+		<Compile Include="Views/Icons.fs" />
+		<Compile Include="Views/NativeJs.fs" />
+		<Compile Include="Views/Styles.fs" />
+		<Compile Include="Views/Components/ScrollToTop.fs" />
+		<Compile Include="Views/Components/Modal.fs" />
+		<Compile Include="Views/Components/Landing.fs" />
+		<Compile Include="Views/Components/Tags.fs" />
+		<Compile Include="Views/Components/BatchTags.fs" />
+		<Compile Include="Views/Components/MemoryMeta.fs" />
+		<Compile Include="Views/Components/MemoryDetail.fs" />
+		<Compile Include="Views/Components/MemoryDetailModal.fs" />
+		<Compile Include="Views/Components/Thumbnails.fs" />
+		<Compile Include="Views/Components/Memories.fs" />
+		<Compile Include="Views/Components/HistoryOfToday.fs" />
+		<Compile Include="Views/Components/UploadFiles.fs" />
+		<Compile Include="Views/Pages/*.fs" />
+		<Compile Include="Views/App.fs" />
+		
+		<Compile Include="Endpoints/*.fs" />
+
+		<Compile Include="Startup.fs" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.24" />
+		
+		<PackageReference Include="Fun.Blazor.Microsoft.Authorization" Version="8.0.0" />
+		<PackageReference Include="Fun.Blazor.Microsoft.Web" Version="8.0.0" />
+		<PackageReference Include="Fun.Htmx" Version="3.3.0-beta*" />
+		<PackageReference Include="Fun.Blazor" Version="3.3.0-beta*" />
+		<PackageReference Include="Fun.Blazor.Server" Version="3.3.0-beta*" />
+		<PackageReference Include="Fun.Blazor.CustomElements" Version="3.3.0-beta*" />
+
+		<PackageReference Include="FFMediaToolkit" Version="4.5.1" />
+		<PackageReference Include="HeyRed.ImageSharp.Heif" Version="2.1.3" />
+		<PackageReference Include="LibHeif.Native" Version="1.15.1" />
+		<PackageReference Include="Sdcb.LibRaw" Version="0.21.1.6" />
+		<PackageReference Include="Sdcb.LibRaw.runtime.linux64" Version="0.21.1" />
+		<PackageReference Include="Sdcb.LibRaw.runtime.win64" Version="0.21.1" />
+		<PackageReference Include="SixLabors.ImageSharp.Web" Version="3.1.0" />
+
+		<PackageReference Include="MediatR" Version="12.2.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
+
+		<PackageReference Include="ViewFaceCore" Version="0.3.7" />
+		<PackageReference Include="ViewFaceCore.all_models" Version="6.0.7" />
+		<PackageReference Include="ViewFaceCore.Extension.ImageSharp" Version="0.3.7" />
+		<PackageReference Include="ViewFaceCore.runtime.win.x64" Version="6.0.7" />
+		<PackageReference Include="ViewFaceCore.runtime.linux.arm64" Version="6.0.7" />
+		<PackageReference Include="ViewFaceCore.runtime.ubuntu.20.04.x64" Version="6.0.7" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <ProjectReference Include="..\Memory.Db\Memory.Db.csproj" />
+	</ItemGroup>
+
+</Project>

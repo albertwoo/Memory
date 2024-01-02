@@ -1,0 +1,13 @@
+namespace Memory.Views.Components
+
+open Fun.Blazor
+open Fun.Blazor.Unsafe
+open Memory.Views
+
+type ScrollToTop =
+
+    static member Btn() = button {
+        class' "btn btn-circle btn-primary shadow-md opacity-70 hover:opacity-100"
+        onclick "window.scrollTo({top: 0, behavior: 'smooth'});"
+        Icons.DoubleUp()
+    }
