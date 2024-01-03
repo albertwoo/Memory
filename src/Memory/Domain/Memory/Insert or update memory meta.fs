@@ -52,7 +52,7 @@ module private Meta =
         let degree = value[0].Numerator |> float
         let minutes = value[1].Numerator |> float
         let seconds = float value[2].Numerator / float value[2].Denominator
-        degree + minutes / 60.0 + Math.Round(seconds / 3600., 8)
+        Math.Round(degree + minutes / 60.0 + seconds / 3600., 8)
 
 
     let createOptimizedWebp (fromFile: string, toFile: string) = task {
@@ -153,7 +153,7 @@ module private Meta =
         firstFrame.Mutate(fun ctx ->
             ctx.Resize(ResizeOptions(Mode = ResizeMode.Crop, Size = Size(width = size, height = size), Compand = true)) |> ignore
         )
-        firstFrame.SaveAsWebpAsync(fileName, WebpEncoder(Quality = 75))
+        firstFrame.SaveAsWebpAsync(fileName, WebpEncoder(Quality = 90))
 
 
     let extractExifMeta (logger: ILogger) (profile: ExifProfile) (meta: MemoryMeta) =
