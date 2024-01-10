@@ -49,7 +49,7 @@ let stage_donwloadFFmpeg targetDir = stage "download_ffmpeg" {
 
         if File.Exists zipFile |> not then
             let url =
-                $"https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-{platform}-gpl-shared.{zipType}"
+                $"https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n6.1-latest-{platform}-gpl-shared-6.1.{zipType}"
             
             printfn "Download ffmpeg from %s" url
 
