@@ -12,6 +12,7 @@ open Memory.Domain
 open Memory.Options
 open Memory.Views
 
+[<ComponentResponseCacheFor1Day>]
 type MemoryDetail() as this =
     inherit FunComponent()
 
@@ -40,6 +41,7 @@ type MemoryDetail() as this =
                             autoplay
                             loop
                             class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
+                            poster (AppOptions.CreateOptimizedUrlForImage(this.Id) |> appOptions.Value.AppendWithVersion)
                             source {
                                 src (
                                     match transformedFormat memory.FileExtension with

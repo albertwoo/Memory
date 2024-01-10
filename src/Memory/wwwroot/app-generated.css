@@ -4372,6 +4372,10 @@ input.tab:checked + .tab-content,
   padding: 1.25rem;
 }
 
+.p-1 {
+  padding: 0.25rem;
+}
+
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
@@ -4380,6 +4384,11 @@ input.tab:checked + .tab-content,
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
+}
+
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .pb-2 {
@@ -4654,6 +4663,11 @@ input.tab:checked + .tab-content,
 
   .sm\:border-primary\/20 {
     border-color: var(--fallback-p,oklch(var(--p)/0.2));
+  }
+
+  .sm\:px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .sm\:text-lg {

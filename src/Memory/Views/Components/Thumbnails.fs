@@ -89,7 +89,7 @@ type Thumbnail() as this =
                     if String.IsNullOrEmpty this.FileExtension |> not then
                         this.FileExtension.Substring(1)
                 }
-                progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-bars loading-md" }
+                progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-bars w-full h-full p-2" }
                 input {
                     hxTrigger hxEvt.mouse.click
                     hxGetComponent (QueryBuilder<BatchTagsIndicatorBtn>().Add((fun x -> x.SelectedId), Nullable this.Id))

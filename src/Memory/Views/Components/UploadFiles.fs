@@ -6,17 +6,16 @@ open System.Security.Claims
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Hosting
+open Microsoft.Net.Http.Headers
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Components
 open Microsoft.AspNetCore.Components.Forms
+open Microsoft.AspNetCore.WebUtilities
 open Fun.Htmx
 open Fun.Blazor
 open Fun.Blazor.Unsafe
 open Memory.Options
 open Memory.Views
-open Microsoft.AspNetCore.WebUtilities
-open Microsoft.Net.Http.Headers
-
 
 type UploadFiles() as this =
     inherit FunComponent()

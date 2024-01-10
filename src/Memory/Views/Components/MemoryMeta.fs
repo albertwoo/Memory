@@ -6,7 +6,6 @@ open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Components
 open Microsoft.EntityFrameworkCore
 open Fun.Blazor
-open Memory
 open Memory.Db
 open Memory.Options
 open Memory.Views
@@ -61,7 +60,7 @@ type MemoryMeta() as this =
                                 href $"https://ditu.amap.com/regeo?lng={longitude}&lat={latitude}"
                                 // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
                                 class' "link"
-                                string latitude + ", " + string longitude
+                                $"%.8f{latitude}, %.8f{longitude}"
                             }
                           }
                         | _ -> ()
@@ -70,6 +69,7 @@ type MemoryMeta() as this =
         })
 
 
+[<ComponentResponseCacheFor1Day>]
 type MemoryMetaModal() as this =
     inherit FunComponent()
 

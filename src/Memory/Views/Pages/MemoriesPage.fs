@@ -167,7 +167,7 @@ type MemoriesPage() as this =
         hxModal (QueryBuilder<UploadFilesModal>())
         class' "btn btn-primary btn-ghost relative"
         Icons.Uploads()
-        progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-ring loading-md" }
+        progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-ring w-full h-full p-1" }
     }
 
     override _.Render() =

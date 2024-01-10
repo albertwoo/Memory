@@ -50,7 +50,7 @@ type Modal =
 
             let sizeClasses =
                 match modalSize with
-                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20"
+                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20 px-0 sm:px-2"
                 | ModalSize.Medium -> "border border-primary/20"
 
             let removeModalJs = 

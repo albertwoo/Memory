@@ -9,6 +9,7 @@ open Fun.Blazor
 open Memory
 open Memory.Views
 
+[<ComponentResponseCacheFor1Day>]
 type MemoryDetailModal() as this =
     inherit FunComponent()
 
