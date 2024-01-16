@@ -7,7 +7,6 @@ open Microsoft.AspNetCore.Components
 open MediatR
 open Fun.Htmx
 open Fun.Blazor
-open Fun.Blazor.Unsafe
 open Memory
 open Memory.Options
 open Memory.Domain
@@ -99,7 +98,7 @@ type Thumbnail() as this =
                     name (nameof Unchecked.defaultof<BatchTagsIndicatorBtn>.IncludeSelectedId)
 
                     type' InputTypes.checkbox
-                    onclick "event.stopPropagation()"
+                    on.click "event.stopPropagation()"
                     class'
                         $"{BatchTagsModal.ThumbnailChecker} absolute right-0 bottom-0 checkbox checkbox-primary border-2 opacity-0 sm:opacity-70 sm:hidden sm:group-hover:block checked:opacity-70 checked:block"
                 }

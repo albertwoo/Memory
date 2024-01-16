@@ -3,7 +3,6 @@ namespace Memory.Views.Components
 open System
 open Fun.Htmx
 open Fun.Blazor
-open Fun.Blazor.Unsafe
 open Fun.Blazor.Operators
 open Memory.Views
 
@@ -88,7 +87,7 @@ type Modal =
             let closeAttr = domAttr { 
                 tabindex 0
                 autofocus
-                onclick removeModalJs 
+                on.click removeModalJs 
             }
 
             dialog {
@@ -98,7 +97,7 @@ type Modal =
                 class' "modal modal-open outline-none"
 
                 div {
-                    onclick "event.stopPropagation()"
+                    on.click "event.stopPropagation()"
                     class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2 {sizeClasses}"
                     style { cssRules.FadeInUpCss() }
                     h3 {

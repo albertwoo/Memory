@@ -13,7 +13,6 @@ open Microsoft.AspNetCore.Components.Forms
 open Microsoft.AspNetCore.WebUtilities
 open Fun.Htmx
 open Fun.Blazor
-open Fun.Blazor.Unsafe
 open Memory.Options
 open Memory.Views
 
@@ -225,7 +224,7 @@ type UploadFilesModal() =
             actions = fragment {
                 button {
                     class' "link"
-                    onclick (NativeJs.ReloadPage())
+                    on.click (NativeJs.ReloadPage())
                     "Refresh"
                 }
             }
