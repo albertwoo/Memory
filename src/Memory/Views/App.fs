@@ -14,12 +14,9 @@ type App() =
     inherit FunComponent()
 
     override _.Render() =
-        html.inject (fun (appOptions: IOptions<AppOptions>) -> fragment {
-            doctype "html"
-            html' {
-                lang "CN"
-                data "theme" appOptions.Value.Theme
-                head {
+        html.inject (fun (appOptions: IOptions<AppOptions>) ->
+            let head =
+                head.create [|
                     baseUrl "/"
                     meta { charset "utf-8" }
                     meta {
@@ -35,15 +32,16 @@ type App() =
                     stylesheet ("app-generated.css" |> appOptions.Value.AppendWithVersion)
                     html.scopedCssRules
 
-                    HeadOutlet'()
+                    HeadOutlet'.create ()
                     CustomElement.lazyBlazorJs ()
-                }
-                body {
+                |]
+
+            let body =
+                body.create [|
                     Modal.Container()
                     section {
                         class' "flex flex-col items-center justify-center"
-                        Landing.Title()
-                        Landing.SubTitle()
+                        childContent [| Landing.Title(); Landing.SubTitle() |]
                     }
                     Router'() {
                         AppAssembly(Assembly.GetExecutingAssembly())
@@ -56,6 +54,14 @@ type App() =
                         )
                     }
                     script { src "htmx.org@1.9.9.js" }
+                |]
+                
+            html.fragment [|
+                doctype "html"
+                html' {
+                    lang "CN"
+                    data "theme" appOptions.Value.Theme
+                    childContent [| head; body |]
                 }
-            }
-        })
+            |]
+        )

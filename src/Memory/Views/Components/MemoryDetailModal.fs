@@ -53,78 +53,82 @@ type MemoryDetailModal() as this =
         let content = div {
             id contentId
             class' "h-full overflow-hidden flex flex-col items-stretch justify-center bg-transparent"
-            script {
-                $$"""
-                (function(){
-                    const container = document.getElementById('{{contentId}}');
+            childContent [|
+                script {
+                    $$"""
+                    (function(){
+                        const container = document.getElementById('{{contentId}}');
 
-                    // Variables to store touch start and end positions
-                    var touchStartX = 0;
-                    var touchEndX = 0;
+                        // Variables to store touch start and end positions
+                        var touchStartX = 0;
+                        var touchEndX = 0;
 
-                    container.addEventListener('touchstart', function (event) {
-                        touchStartX = event.touches[0].clientX;
-                    });
-                    container.addEventListener('touchend', function (event) {
-                        touchEndX = event.changedTouches[0].clientX;
-                        
-                        const swipeDistance = touchEndX - touchStartX;
-                        const swipeThreshold = 50;
+                        container.addEventListener('touchstart', function (event) {
+                            touchStartX = event.touches[0].clientX;
+                        });
+                        container.addEventListener('touchend', function (event) {
+                            touchEndX = event.changedTouches[0].clientX;
+                            
+                            const swipeDistance = touchEndX - touchStartX;
+                            const swipeThreshold = 50;
 
-                        if (swipeDistance > swipeThreshold) {
-                            document.getElementById('{{previousButtonId}}').click()
-                        } else if (swipeDistance < -swipeThreshold) {
-                            document.getElementById('{{nextButtonId}}').click()
-                        }
-                    });
-                })()
-                """
-            }
-            match memoryId with
-            | Some memoryId ->
-                script { NativeJs.UpdateQueries(queriesToAdd = [ GlobalQuery.CreateForMemoryId memoryId ]) }
-                html.blazor (ComponentAttrBuilder<MemoryDetail>().Add((fun x -> x.Id), memoryId))
-
-            | None ->
-                script { NativeJs.UpdateQueries(queriesToDelete = [ GlobalQuery.MemoryId ]) }
-                div {
-                    class' "text-3xl text-warning text-center font-bold"
-                    "Not found"
+                            if (swipeDistance > swipeThreshold) {
+                                document.getElementById('{{previousButtonId}}').click()
+                            } else if (swipeDistance < -swipeThreshold) {
+                                document.getElementById('{{nextButtonId}}').click()
+                            }
+                        });
+                    })()
+                    """
                 }
+                match memoryId with
+                | Some memoryId ->
+                    script { NativeJs.UpdateQueries(queriesToAdd = [ GlobalQuery.CreateForMemoryId memoryId ]) }
+                    html.blazor (ComponentAttrBuilder<MemoryDetail>().Add((fun x -> x.Id), memoryId))
+
+                | None ->
+                    script { NativeJs.UpdateQueries(queriesToDelete = [ GlobalQuery.MemoryId ]) }
+                    div {
+                        class' "text-3xl text-warning text-center font-bold"
+                        "Not found"
+                    }
+            |]
         }
 
-        let actions = fragment {
-            let id' = defaultArg memoryId this.Id
+        let id' = defaultArg memoryId this.Id
 
-            let sharedActionAttrs (forPreviousOrNext: bool) = domAttr {
-                hxUpdateModal (
-                    QueryBuilder<MemoryDetailModal>()
-                        .Add(this)
-                        .Add((fun x -> x.Id), id')
-                        .Add((fun x -> x.ForPreviousOrNext), (if memoryId.IsNone then Nullable() else Nullable forPreviousOrNext))
-                )
-                tabindex 0
-                class' "join-item btn btn-sm"
-            }
+        let sharedActionAttrs (forPreviousOrNext: bool) = domAttr {
+            hxUpdateModal (
+                QueryBuilder<MemoryDetailModal>()
+                    .Add(this)
+                    .Add((fun x -> x.Id), id')
+                    .Add((fun x -> x.ForPreviousOrNext), (if memoryId.IsNone then Nullable() else Nullable forPreviousOrNext))
+            )
+            tabindex 0
+            class' "join-item btn btn-sm"
+        }
 
+        let actions = html.fragment [|
             div {
                 class' "join"
-                if not (memoryId.IsNone && this.ForPreviousOrNext.Value) then
-                    button {
-                        id previousButtonId
-                        hxTrigger' (hxEvt.mouse.click + "," + hxEvt.keyboard.keyup + "[key=='ArrowLeft']", from = "closest dialog")
-                        sharedActionAttrs true
-                        Icons.Left()
-                    }
-                if not (memoryId.IsNone && this.ForPreviousOrNext.HasValue && not this.ForPreviousOrNext.Value) then
-                    button {
-                        id nextButtonId
-                        hxTrigger' (hxEvt.mouse.click + "," + hxEvt.keyboard.keyup + "[key=='ArrowRight']", from = "closest dialog")
-                        sharedActionAttrs false
-                        Icons.Right()
-                    }
+                childContent [|
+                    if not (memoryId.IsNone && this.ForPreviousOrNext.Value) then
+                        button {
+                            id previousButtonId
+                            hxTrigger' (hxEvt.mouse.click + "," + hxEvt.keyboard.keyup + "[key=='ArrowLeft']", from = "closest dialog")
+                            sharedActionAttrs true
+                            Icons.Left()
+                        }
+                    if not (memoryId.IsNone && this.ForPreviousOrNext.HasValue && not this.ForPreviousOrNext.Value) then
+                        button {
+                            id nextButtonId
+                            hxTrigger' (hxEvt.mouse.click + "," + hxEvt.keyboard.keyup + "[key=='ArrowRight']", from = "closest dialog")
+                            sharedActionAttrs false
+                            Icons.Right()
+                        }
+                |]
             }
-        }
+        |]
 
         Modal.Create(
             title = title,

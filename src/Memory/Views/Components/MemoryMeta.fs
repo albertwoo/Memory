@@ -34,7 +34,7 @@ type MemoryMeta() as this =
                     )
                     |> Option.defaultWith (fun () -> Path.GetFileName memory.FilePath)
 
-                return div {
+                return div.create [
                     h3 {
                         class' "text-xl text-primary font-bold"
                         style { "overflow-wrap", "break-word" }
@@ -49,23 +49,27 @@ type MemoryMeta() as this =
                     | memoryMeta -> section {
                         class' "text-sm mt-2"
                         style { cssRules.FadeInUpCss() }
-                        p { memoryMeta.Make + " " + memoryMeta.Modal }
-                        p { memoryMeta.LensModal }
-                        match Option.ofNullable memoryMeta.Latitude, Option.ofNullable memoryMeta.Longitude with
-                        | Some latitude, Some longitude -> p {
-                            class' "flex items-center gap-2"
-                            Icons.MapPin(class' = "h-3 w-3")
-                            a {
-                                target "_blank"
-                                href $"https://ditu.amap.com/regeo?lng={longitude}&lat={latitude}"
-                                // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
-                                class' "link"
-                                $"%.8f{latitude}, %.8f{longitude}"
-                            }
-                          }
-                        | _ -> ()
+                        childContent [|
+                            p { memoryMeta.Make + " " + memoryMeta.Modal }
+                            p { memoryMeta.LensModal }
+                            match Option.ofNullable memoryMeta.Latitude, Option.ofNullable memoryMeta.Longitude with
+                            | Some latitude, Some longitude -> p {
+                                class' "flex items-center gap-2"
+                                childContent [|
+                                    Icons.MapPin(class' = "h-3 w-3")
+                                    a {
+                                        target "_blank"
+                                        href $"https://ditu.amap.com/regeo?lng={longitude}&lat={latitude}"
+                                        // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
+                                        class' "link"
+                                        $"%.8f{latitude}, %.8f{longitude}"
+                                    }
+                                |]
+                              }
+                            | _ -> ()
+                        |]
                       }
-                }
+                ]
         })
 
 

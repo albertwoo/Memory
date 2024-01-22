@@ -49,18 +49,20 @@ type HistoryOfToday() as this =
 
                 return div {
                     class' "flex flex-wrap gap-2 items-center justify-center"
-                    if currentYear > minYear then
-                        for year in DateTime.Now.Year .. (-1) .. minYear do
-                            if year <> currentYear then
-                                html.blazor (
-                                    ComponentAttrBuilder<Thumbnails>()
-                                        .Add((fun x -> x.Year), year)
-                                        .Add((fun x -> x.Month), currentMonth)
-                                        .Add((fun x -> x.Day), currentDay)
-                                        .Add((fun x -> x.Tags), this.Tags)
-                                        .Add((fun x -> x.ViewSize), this.ViewSize)
-                                        .Add((fun x -> x.ForHisotryOfToday), true)
-                                )
+                    childContent [|
+                        if currentYear > minYear then
+                            for year in DateTime.Now.Year .. (-1) .. minYear do
+                                if year <> currentYear then
+                                    html.blazor (
+                                        ComponentAttrBuilder<Thumbnails>()
+                                            .Add((fun x -> x.Year), year)
+                                            .Add((fun x -> x.Month), currentMonth)
+                                            .Add((fun x -> x.Day), currentDay)
+                                            .Add((fun x -> x.Tags), this.Tags)
+                                            .Add((fun x -> x.ViewSize), this.ViewSize)
+                                            .Add((fun x -> x.ForHisotryOfToday), true)
+                                    )
+                    |]
                 }
 
             else

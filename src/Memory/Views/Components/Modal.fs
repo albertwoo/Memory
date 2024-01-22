@@ -90,36 +90,42 @@ type Modal =
                 on.click removeModalJs 
             }
 
+            let dialogContent =
+                div {
+                    on.click "event.stopPropagation()"
+                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2 {sizeClasses}"
+                    style { cssRules.FadeInUpCss() }
+                    childContent [|
+                        h3 {
+                            class' "font-bold text-lg"
+                            title
+                        }
+                        section { 
+                            class' "h-full overflow-hidden flex flex-col items-stretch"
+                            content'
+                        }
+                        section {
+                            class' "modal-action items-center mt-0"
+                            childContent [|
+                                button { class' "htmx-indicator btn loading loading-spinner text-info" }
+                                defaultArg actions html.none
+                                button {
+                                    class' "btn btn-ghost btn-circle"
+                                    closeAttr
+                                    Icons.Clear()
+                                }
+                            |]
+                        }
+                        script { modalJs }
+                    |]
+                }
+
             dialog {
                 id dialogId
                 closeAttr
                 defaultArg containerAttrs html.emptyAttr
                 class' "modal modal-open outline-none"
-
-                div {
-                    on.click "event.stopPropagation()"
-                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2 {sizeClasses}"
-                    style { cssRules.FadeInUpCss() }
-                    h3 {
-                        class' "font-bold text-lg"
-                        title
-                    }
-                    section { 
-                        class' "h-full overflow-hidden flex flex-col items-stretch"
-                        content'
-                    }
-                    section {
-                        class' "modal-action items-center mt-0"
-                        button { class' "htmx-indicator btn loading loading-spinner text-info" }
-                        defaultArg actions html.none
-                        button {
-                            class' "btn btn-ghost btn-circle"
-                            closeAttr
-                            Icons.Clear()
-                        }
-                    }
-                    script { modalJs }
-                }
+                dialogContent
             }
         )
 

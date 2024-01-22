@@ -41,7 +41,7 @@ type Memories() as this =
     member val ShowRestOfMonthes = true with get, set
 
 
-    member _.MemoryLoader() = fragment {
+    member _.MemoryLoader() = html.fragment [|
         span { class' "loading loading-ring loading-xs" }
         span { class' "loading loading-ring loading-sm" }
         span { class' "loading loading-ring loading-md" }
@@ -49,7 +49,7 @@ type Memories() as this =
         span { class' "loading loading-ring loading-md" }
         span { class' "loading loading-ring loading-sm" }
         span { class' "loading loading-ring loading-xs" }
-    }
+    |]
 
     member _.RestMemories() = section {
         hxTrigger' (hxEvt.intersect, once = true)
@@ -87,7 +87,7 @@ type Memories() as this =
                 else
                     Task.retn 0
 
-            return fragment {
+            return html.fragment [|
                 if this.Month = 12 || this.AlwaysShowYear || not this.ShowRestOfMonthes then
                     a {
                         target "_blank"
@@ -166,5 +166,5 @@ type Memories() as this =
                     }
                 if (this.ShowRestOfYears && restCount > 0) || (this.ShowRestOfMonthes && this.Month > 1) then
                     this.RestMemories()
-            }
+            |]
         })
