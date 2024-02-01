@@ -66,8 +66,8 @@ module private Meta =
     }
 
 
-    /// Should convert any video to mp4 and generate image based on the first frame
-    let createOptimizedMp4 (ffmpegFile: string) (fromFile: string, toFile: string, toImageFile: string) =
+    /// Should convert any video to webm and generate image based on the first frame
+    let createOptimizedVideo (ffmpegFile: string) (fromFile: string, toFile: string, toImageFile: string) =
         use mediaFile = MediaFile.Open fromFile
 
         if mediaFile.HasVideo then
@@ -123,7 +123,7 @@ module private Meta =
         let processStartInfo = ProcessStartInfo()
         processStartInfo.FileName <- ffmpegFile
         processStartInfo.Arguments <-
-            $"""-i "{fromFile}" -c:v libx264 -c:a aac -b:v 100k -b:a 48k -preset fast -crf 28 -max_muxing_queue_size 1024 -y -vf "scale=w=min(1920\,iw):h=min(1080\,ih):force_original_aspect_ratio=decrease,fps=20" -strict -2 {toFile} -loglevel {logLevel}"""
+            $"""-i "{fromFile}" -c:v libx264 -c:a aac -b:v 0 -b:a 48k -preset fast -crf 28 -y -vf "scale=w=min(1920\,iw):h=min(1080\,ih):force_original_aspect_ratio=decrease,fps=20,format=yuv420p" {toFile} -loglevel {logLevel}"""
 
         use ps = new Process()
         ps.StartInfo <- processStartInfo
@@ -224,7 +224,7 @@ type ``Insert or update memory meta handler``
             if not isSmallThumbnailFileExist || meta = null then
                 logger.LogInformation("Start optimize memory {id} {file}", request.Id, request.File)
 
-                let webpFile = optimizedFolder </> string request.Id + ".webp"
+                let webpFile = optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id)
 
                 let! file = task {
                     // Optimized all files to webp
@@ -247,9 +247,9 @@ type ``Insert or update memory meta handler``
 
                     | VideoFormat ->
                         do!
-                            Meta.createOptimizedMp4
+                            Meta.createOptimizedVideo
                                 (appOptions.Value.FFmpegBinFolder </> "ffmpeg")
-                                (request.File, optimizedFolder </> string request.Id + ".mp4", webpFile)
+                                (request.File, optimizedFolder </> AppOptions.CreateOptimizedNameForVideo(request.Id), webpFile)
                         return webpFile
 
                     | _ ->

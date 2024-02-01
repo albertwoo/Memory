@@ -4,6 +4,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Formats
 open HeyRed.ImageSharp.Heif.Formats
 open Fun.Result
+open Memory.Options
 
 
 [<AutoOpen>]
@@ -86,6 +87,6 @@ module Format =
     let transformedFormat =
         function
         | Gif -> None
-        | ImageFormat -> Some ".webp"
-        | VideoFormat -> Some ".mp4"
+        | ImageFormat -> Some $".{AppOptions.OptimizedImageFormat}"
+        | VideoFormat -> Some $".{AppOptions.OptimizedVideoFormat}"
         | _ -> None
