@@ -19,9 +19,11 @@ type MemoryDetailPage() as this =
     override _.Render() =
         html.inject (fun (appOptions: IOptions<AppOptions>) -> main {
             class' "p-5"
-            PageTitle'() { appOptions.Value.Title + " #" + string this.id }
-            section {
-                class' "max-h-[calc(100vh-100px)] overflow-hidden flex flex-col items-center justify-start"
-                html.blazor (ComponentAttrBuilder<MemoryDetail>().Add((fun x -> x.Id), this.id))
-            }
+            childContent [|
+                PageTitle'() { appOptions.Value.Title + " #" + string this.id }
+                section {
+                    class' "max-h-[calc(100vh-100px)] overflow-hidden flex flex-col items-center justify-start"
+                    html.blazor (ComponentAttrBuilder<MemoryDetail>().Add((fun x -> x.Id), this.id))
+                }
+            |]
         })

@@ -111,33 +111,35 @@ type BatchTagsIndicatorBtn() as this =
             
             class' "btn btn-circle shadow-md opacity-70 hover:opacity-100 relative"
             
-            // So other components can include this parameters for htmx
-            input {
-                type' InputTypes.hidden
-                name (nameof this.SelectedIds)
-                value this.SelectedIds
-            }
-            
-            Icons.Tag()
-
-            progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-spinner loading-sm" }
-
-            // Indicator
-            if count > 0 then
-                div {
-                    class' "absolute left-0 top-0 right-0 bottom-0 w-full indicator"
-                    span {
-                        class' "indicator-item badge badge-secondary"
-                        if count > 99 then "99+" else string count
-                    }
+            childContent [|
+                // So other components can include this parameters for htmx
+                input {
+                    type' InputTypes.hidden
+                    name (nameof this.SelectedIds)
+                    value this.SelectedIds
                 }
+                
+                Icons.Tag()
+
+                progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-spinner w-full h-full p-1" }
+
+                // Indicator
+                if count > 0 then
+                    div {
+                        class' "absolute left-0 top-0 right-0 bottom-0 w-full indicator"
+                        span {
+                            class' "indicator-item badge badge-secondary"
+                            if count > 99 then "99+" else string count
+                        }
+                    }
+            |]
         }
 
         
     static member Id = "batch-tags-indicator-btn"
     static member BatchSelectionBtnId = "batch-tags-selection-btn"
 
-    static member Scripts() = fragment {
+    static member Scripts() = html.fragment [|
         button {
             id BatchTagsIndicatorBtn.BatchSelectionBtnId
             hxTrigger hxEvt.mouse.click
@@ -186,4 +188,4 @@ type BatchTagsIndicatorBtn() as this =
             });
             """
         }
-    }
+    |]

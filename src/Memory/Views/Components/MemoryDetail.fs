@@ -12,6 +12,7 @@ open Memory.Domain
 open Memory.Options
 open Memory.Views
 
+[<ComponentResponseCacheFor1Day>]
 type MemoryDetail() as this =
     inherit FunComponent()
 
@@ -34,60 +35,68 @@ type MemoryDetail() as this =
                 let mediaView =
                     div {
                         class' "h-full flex-shrink overflow-hidden flex flex-col items-center justify-center"
-                        match memory.FileExtension with
-                        | VideoFormat -> video {
-                            controls
-                            autoplay
-                            loop
-                            class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
-                            source {
+                        childContent [|
+                            match memory.FileExtension with
+                            | VideoFormat -> video {
+                                controls
+                                autoplay
+                                loop
+                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
+                                poster (AppOptions.CreateOptimizedUrlForImage(this.Id) |> appOptions.Value.AppendWithVersion)
+                                source {
+                                    src (
+                                        match transformedFormat memory.FileExtension with
+                                        | None -> $"/memory/original/{memory.Id}"
+                                        | Some _ -> AppOptions.CreateOptimizedUrlForVideo(this.Id)
+                                        |> appOptions.Value.AppendWithVersion
+                                    )
+                                }
+                              }
+                            | ImageFormat -> img {
+                                openMetaAttr
+                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
                                 src (
                                     match transformedFormat memory.FileExtension with
                                     | None -> $"/memory/original/{memory.Id}"
-                                    | Some _ -> AppOptions.CreateOptimizedUrlForVideo(this.Id)
+                                    | Some _ -> AppOptions.CreateOptimizedUrlForImage(this.Id)
                                     |> appOptions.Value.AppendWithVersion
                                 )
-                            }
-                          }
-                        | ImageFormat -> img {
-                            openMetaAttr
-                            class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
-                            src (
-                                match transformedFormat memory.FileExtension with
-                                | None -> $"/memory/original/{memory.Id}"
-                                | Some _ -> AppOptions.CreateOptimizedUrlForImage(this.Id)
-                                |> appOptions.Value.AppendWithVersion
-                            )
-                          }
-                        | _ -> p {
-                            class' "text-warning"
-                            $"Unsupported format: {memory.FileExtension}"
-                          }
+                              }
+                            | _ -> p {
+                                class' "text-warning"
+                                $"Unsupported format: {memory.FileExtension}"
+                              }
+                        |]
                     }
 
                 return section {
                     class' "flex flex-col items-center justify-start gap-2 overflow-hidden h-full mx-auto max-w-[1920px]"
                     style { cssRules.FadeInUpCss(delay = 200) }
-
-                    mediaView
-                    div {
-                        class' "flex justify-center items-center flex-wrap gap-2"
-                        html.blazor (ComponentAttrBuilder<TagLists>().Add((fun x -> x.MemoryId), this.Id).Add((fun x -> x.EnableEdit), true))
-                    }
-                    div {
-                        class' "flex items-end gap-2"
-                        p {
-                            class' "flex items-center gap-1 cursor-pointer opacity-40 hover:opacity-75 sm:text-lg md:text-2xl text-neutral-500 font-bold md:font-extrabold"
-                            openMetaAttr
-                            Icons.InfoCircle(class' = "w-6 h-6")
-                            memory.CreationTime.ToString("yyyy-MM-dd HH:mm:ss") + $" 👁️ {memory.Views + 1}"
+                    childContent [|
+                        mediaView
+                        div {
+                            class' "flex justify-center items-center flex-wrap gap-2"
+                            html.blazor (ComponentAttrBuilder<TagLists>().Add((fun x -> x.MemoryId), this.Id).Add((fun x -> x.EnableEdit), true))
                         }
-                        a {
-                            href ($"/memory/original/{memory.Id}" |> appOptions.Value.AppendWithVersion)
-                            download true
-                            class' "btn btn-link btn-sm btn-square"
-                            Icons.ArrowDownTray()
+                        div {
+                            class' "flex items-end gap-2"
+                            childContent [|
+                                p {
+                                    class' "flex items-center gap-1 cursor-pointer opacity-40 hover:opacity-75 sm:text-lg md:text-2xl text-neutral-500 font-bold md:font-extrabold"
+                                    openMetaAttr
+                                    childContent [|
+                                        Icons.InfoCircle(class' = "w-6 h-6")
+                                        span { memory.CreationTime.ToString("yyyy-MM-dd HH:mm:ss") + $" 👁️ {memory.Views + 1}" }
+                                    |]
+                                }
+                                a {
+                                    href ($"/memory/original/{memory.Id}" |> appOptions.Value.AppendWithVersion)
+                                    download true
+                                    class' "btn btn-link btn-sm btn-square"
+                                    Icons.ArrowDownTray()
+                                }
+                            |]
                         }
-                    }
+                    |]
                 }
         })

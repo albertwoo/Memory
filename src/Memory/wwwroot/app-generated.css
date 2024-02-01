@@ -4360,6 +4360,10 @@ input.tab:checked + .tab-content,
   background-color: var(--fallback-wa,oklch(var(--wa)/var(--tw-bg-opacity)));
 }
 
+.p-1 {
+  padding: 0.25rem;
+}
+
 .p-2 {
   padding: 0.5rem;
 }
@@ -4370,6 +4374,11 @@ input.tab:checked + .tab-content,
 
 .p-5 {
   padding: 1.25rem;
+}
+
+.px-0 {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .px-2 {
@@ -4654,6 +4663,11 @@ input.tab:checked + .tab-content,
 
   .sm\:border-primary\/20 {
     border-color: var(--fallback-p,oklch(var(--p)/0.2));
+  }
+
+  .sm\:px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
 
   .sm\:text-lg {

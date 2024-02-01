@@ -3,7 +3,6 @@ namespace Memory.Views.Components
 open System
 open Fun.Htmx
 open Fun.Blazor
-open Fun.Blazor.Unsafe
 open Fun.Blazor.Operators
 open Memory.Views
 
@@ -50,7 +49,7 @@ type Modal =
 
             let sizeClasses =
                 match modalSize with
-                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20"
+                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20 px-0 sm:px-2"
                 | ModalSize.Medium -> "border border-primary/20"
 
             let removeModalJs = 
@@ -88,39 +87,45 @@ type Modal =
             let closeAttr = domAttr { 
                 tabindex 0
                 autofocus
-                onclick removeModalJs 
+                on.click removeModalJs 
             }
+
+            let dialogContent =
+                div {
+                    on.click "event.stopPropagation()"
+                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2 {sizeClasses}"
+                    style { cssRules.FadeInUpCss() }
+                    childContent [|
+                        h3 {
+                            class' "font-bold text-lg"
+                            title
+                        }
+                        section { 
+                            class' "h-full overflow-hidden flex flex-col items-stretch"
+                            content'
+                        }
+                        section {
+                            class' "modal-action items-center mt-0"
+                            childContent [|
+                                button { class' "htmx-indicator btn loading loading-spinner text-info" }
+                                defaultArg actions html.none
+                                button {
+                                    class' "btn btn-ghost btn-circle"
+                                    closeAttr
+                                    Icons.Clear()
+                                }
+                            |]
+                        }
+                        script { modalJs }
+                    |]
+                }
 
             dialog {
                 id dialogId
                 closeAttr
                 defaultArg containerAttrs html.emptyAttr
                 class' "modal modal-open outline-none"
-
-                div {
-                    onclick "event.stopPropagation()"
-                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2 {sizeClasses}"
-                    style { cssRules.FadeInUpCss() }
-                    h3 {
-                        class' "font-bold text-lg"
-                        title
-                    }
-                    section { 
-                        class' "h-full overflow-hidden flex flex-col items-stretch"
-                        content'
-                    }
-                    section {
-                        class' "modal-action items-center mt-0"
-                        button { class' "htmx-indicator btn loading loading-spinner text-info" }
-                        defaultArg actions html.none
-                        button {
-                            class' "btn btn-ghost btn-circle"
-                            closeAttr
-                            Icons.Clear()
-                        }
-                    }
-                    script { modalJs }
-                }
+                dialogContent
             }
         )
 

@@ -6,17 +6,15 @@ open System.Security.Claims
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Hosting
+open Microsoft.Net.Http.Headers
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Components
 open Microsoft.AspNetCore.Components.Forms
+open Microsoft.AspNetCore.WebUtilities
 open Fun.Htmx
 open Fun.Blazor
-open Fun.Blazor.Unsafe
 open Memory.Options
 open Memory.Views
-open Microsoft.AspNetCore.WebUtilities
-open Microsoft.Net.Http.Headers
-
 
 type UploadFiles() as this =
     inherit FunComponent()
@@ -146,31 +144,34 @@ type UploadFiles() as this =
         id this.FormId
         hxPostComponent typeof<UploadFiles>
         enctype "multipart/form-data"
+        childContent [|
+            html.blazor<AntiforgeryToken> ()
 
-        html.blazor<AntiforgeryToken> ()
-
-        div {
-            class' "join w-full"
-            label {
-                class' "join-item form-control w-full"
-                input {
-                    id this.FileInputId
-                    class' "join-item file-input file-input-bordered w-full"
-                    type' InputTypes.file
-                    multiple true
-                    name "files"
-                }
+            div {
+                class' "join w-full"
+                childContent [|
+                    label {
+                        class' "join-item form-control w-full"
+                        input {
+                            id this.FileInputId
+                            class' "join-item file-input file-input-bordered w-full"
+                            type' InputTypes.file
+                            multiple true
+                            name "files"
+                        }
+                    }
+                    button {
+                        class' "join-item btn btn-primary"
+                        type' InputTypes.submit
+                        "Upload"
+                    }
+                |]
             }
-            button {
-                class' "join-item btn btn-primary"
-                type' InputTypes.submit
-                "Upload"
-            }
-        }
 
-        progress { class' "htmx-indicator progress progress-primary" }
-        script { NativeJs.AppendFileCreationHiddenFields($"#{this.FormId}", $"#{this.FileInputId}") }
-        defaultArg message html.none
+            progress { class' "htmx-indicator progress progress-primary" }
+            script { NativeJs.AppendFileCreationHiddenFields($"#{this.FormId}", $"#{this.FileInputId}") }
+            defaultArg message html.none
+        |]
     }
 
     member _.ResultMessageView = 
@@ -181,15 +182,17 @@ type UploadFiles() as this =
           }
         | Error (es: string list) -> div {
             class' "text-error text-center"
-            p {
-                class' "text-lg"
-                "Uploaded failed"
-            }
-            ul {
-                class' "text-sm"
-                for e in es do
-                    li { e }
-            }
+            childContent [|
+                p {
+                    class' "text-lg"
+                    "Uploaded failed"
+                }
+                ul {
+                    class' "text-sm"
+                    for e in es do
+                        li { e }
+                }
+            |]
           }
 
 
@@ -226,7 +229,7 @@ type UploadFilesModal() =
             actions = fragment {
                 button {
                     class' "link"
-                    onclick (NativeJs.ReloadPage())
+                    on.click (NativeJs.ReloadPage())
                     "Refresh"
                 }
             }
