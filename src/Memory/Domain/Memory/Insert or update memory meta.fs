@@ -72,11 +72,24 @@ module private Meta =
         let mutable height, width = 0, 0
 
         if mediaFile.HasVideo then
+            let shouldSwitchWH = int mediaFile.Video.Info.Rotation % 180 <> 0
+
+            height <-
+                if shouldSwitchWH then
+                    mediaFile.Video.Info.FrameSize.Width
+                else
+                    mediaFile.Video.Info.FrameSize.Height
+            width <-
+                if shouldSwitchWH then
+                    mediaFile.Video.Info.FrameSize.Height
+                else
+                    mediaFile.Video.Info.FrameSize.Width
+
             let imageData = mediaFile.Video.GetNextFrame()
             use image = Image.LoadPixelData<Bgr24>(imageData.Data, imageData.ImageSize.Width, imageData.ImageSize.Height)
 
-            height <- image.Height
-            width <- image.Width
+            if mediaFile.Video.Info.Rotation <> 0 then
+                image.Mutate(fun ctx -> ctx.Rotate(float32 mediaFile.Video.Info.Rotation) |> ignore)
 
             if image.Metadata.ExifProfile = null then
                 image.Metadata.ExifProfile <- ExifProfile()
@@ -125,10 +138,10 @@ module private Meta =
         let hratio = float (Math.Min(height, 1920)) / float height
         let wratio = float (Math.Min(width, 1920)) / float width
         let ratio = Math.Min(hratio, wratio)
-        if ratio > 1. then
+        if ratio < 1. then
             height <- int (float height * ratio)
             width <- int (float width * ratio)
-            
+
         let makeEven x = if x % 2 = 0 then x else x + 1
         height <- makeEven height
         width <- makeEven width
