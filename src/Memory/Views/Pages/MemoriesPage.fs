@@ -63,6 +63,7 @@ type MemoriesPage() as this =
     member _.AttrForUpdateCurrentPage = domAttr {
         hxTarget $"#{this.PageId}"
         hxIndicator $"#{this.PageIndicatorId}"
+        hxSwap_outerHTML
     }
 
 
@@ -212,12 +213,7 @@ type MemoriesPage() as this =
                         childContent [|
                             div {
                                 class' "hidden md:block join border border-neutral-500 mt-2"
-                                childContent [|
-                                    this.SizeFilter()
-                                    this.DateFilter(minYear)
-                                    this.TagFilter()
-                                    this.ClearFilter()
-                                |]
+                                childContent [| this.SizeFilter(); this.DateFilter(minYear); this.TagFilter(); this.ClearFilter() |]
                             }
                             div {
                                 class' "md:hidden join border border-neutral-500 mt-2"
@@ -225,11 +221,7 @@ type MemoriesPage() as this =
                             }
                             div {
                                 class' "md:hidden join border border-neutral-500"
-                                childContent [|
-                                    this.DateFilter(minYear)
-                                    this.TagFilter()
-                                    this.ClearFilter()
-                                |]
+                                childContent [| this.DateFilter(minYear); this.TagFilter(); this.ClearFilter() |]
                             }
                             progress {
                                 id this.PageIndicatorId
@@ -241,29 +233,30 @@ type MemoriesPage() as this =
                         class' " mt-1 flex flex-col items-center justify-center"
                         this.MemoryUploader()
                     }
-                    section {
-                        class' "mt-2 flex items-center flex-col justify-center gap-2 mx-2 lg:mx-auto lg:w-[1024px]"
-                        childContent [|
-                            h2 {
-                                class' "text-2xl text-primary font-bold"
-                                "History of Today"
-                            }
-                            html.blazor (
-                                ComponentAttrBuilder<HistoryOfToday>()
-                                    .Add((fun x -> x.Year), this.Year)
-                                    .Add((fun x -> x.Month), this.Month)
-                                    .Add((fun x -> x.Day), this.Day)
-                                    .Add((fun x -> x.Tags), this.SafeTags)
-                                    .Add(
-                                        (fun x -> x.ViewSize),
-                                        match this.SafeViewSize with
-                                        | ThumbnailSize.ExtraSmallByDay
-                                        | ThumbnailSize.ExtraSmallByMonth -> ThumbnailSize.Medium
-                                        | _ -> this.SafeViewSize
-                                    )
-                            )
-                        |]
-                    }
+                    if not (this.Year.HasValue || this.Month.HasValue || this.Day.HasValue || this.SafeTags.Value.Length > 0) then
+                        section {
+                            class' "mt-2 flex items-center flex-col justify-center gap-2 mx-2 lg:mx-auto lg:w-[1024px]"
+                            childContent [|
+                                h2 {
+                                    class' "text-2xl text-primary font-bold"
+                                    "History of Today"
+                                }
+                                html.blazor (
+                                    ComponentAttrBuilder<HistoryOfToday>()
+                                        .Add((fun x -> x.Year), this.Year)
+                                        .Add((fun x -> x.Month), this.Month)
+                                        .Add((fun x -> x.Day), this.Day)
+                                        .Add((fun x -> x.Tags), this.SafeTags)
+                                        .Add(
+                                            (fun x -> x.ViewSize),
+                                            match this.SafeViewSize with
+                                            | ThumbnailSize.ExtraSmallByDay
+                                            | ThumbnailSize.ExtraSmallByMonth -> ThumbnailSize.Medium
+                                            | _ -> this.SafeViewSize
+                                        )
+                                )
+                            |]
+                        }
                     section {
                         class' "mx-2 lg:mx-auto lg:w-[1024px]"
                         html.blazor (
@@ -274,16 +267,16 @@ type MemoriesPage() as this =
                                 .Add(
                                     (fun x -> x.Year),
                                     (if this.Year.HasValue && this.Year.Value > 0 then
-                                        this.Year.Value
-                                    else
-                                        DateTime.Now.Year)
+                                         this.Year.Value
+                                     else
+                                         DateTime.Now.Year)
                                 )
                                 .Add(
                                     (fun x -> x.Month),
                                     (if this.Month.HasValue && this.Month.Value > 0 then
-                                        this.Month.Value
-                                    else
-                                        DateTime.Now.Month)
+                                         this.Month.Value
+                                     else
+                                         DateTime.Now.Month)
                                 )
                                 .Add((fun x -> x.Day), this.Day)
                                 .Add((fun x -> x.Tags), this.SafeTags)
@@ -294,10 +287,7 @@ type MemoriesPage() as this =
                     div {
                         class' "fixed bottom-4 right-4 z-20 flex flex-col gap-2"
                         style { cssRules.FadeInUpCss() }
-                        childContent [|
-                            html.blazor<BatchTagsIndicatorBtn> ()
-                            ScrollToTop.Btn()
-                        |]
+                        childContent [| html.blazor<BatchTagsIndicatorBtn> (); ScrollToTop.Btn() |]
                     }
 
                     // Scripts
