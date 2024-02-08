@@ -28,7 +28,7 @@ type LoginPage() as this =
     member val ReturnUrl = "" with get, set
 
     member _.Form(?invalidCredential: bool) = form {
-        hxPostComponent (QueryBuilder<LoginPage>().Add((fun x -> x.IsFirstLoad), false))
+        hxPostComponent (QueryBuilder<LoginPage>().Add((fun x -> x.ReturnUrl), this.ReturnUrl).Add((fun x -> x.IsFirstLoad), false))
         hxSwap_outerHTML
         class' "mx-auto rounded-md shadow-md shadow-neutral-500/30 my-10 w-[300px] flex flex-col gap-4 border border-primary/20 p-5"
         childContent [|
@@ -87,13 +87,14 @@ type LoginPage() as this =
                 match result with
                 | LoginResult.Success ->
                     let returnUrl = if String.IsNullOrEmpty this.ReturnUrl then "/" else this.ReturnUrl
-                    return div.create [
-                        script { NativeJs.GoTo returnUrl }
-                        p {
-                            class' "text-success text-3xl font-bold mt-20 text-center uppercase"
-                            "Success, redirecting..."
-                        }
-                    ]
+                    return
+                        div.create [|
+                            script { NativeJs.GoTo returnUrl }
+                            p {
+                                class' "text-success text-3xl font-bold mt-20 text-center uppercase"
+                                "Success, redirecting..."
+                            }
+                        |]
 
                 | LoginResult.InvalidCredential -> return this.Form(invalidCredential = true)
 

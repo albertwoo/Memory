@@ -52,6 +52,7 @@ type FaceTagBackgroundService
     let mutable lastProcessedMemoryId = 0L
     let mutable isFamiliarFacesChanged = false
     let mutable lastTimeForRestartTagTask = DateTime.MinValue
+    let mutable noMoreMemoriesToTagCount = 0
 
     let extractDuplicateTag (input: string) =
         let pattern = @"(\w+)_\d+[.\w+]*"
@@ -160,7 +161,8 @@ type FaceTagBackgroundService
 
 
     member private _.TagNextFace() = task {
-        logger.LogInformation("Try tag next memory. Last processed memory {id}", lastProcessedMemoryId)
+        if noMoreMemoriesToTagCount < 3 then
+            logger.LogInformation("Try tag next memory. Last processed memory {id}", lastProcessedMemoryId)
 
         use scope = sp.CreateScope()
         let memoryDb = scope.ServiceProvider.GetRequiredService<MemoryDbContext>()
@@ -247,7 +249,6 @@ type FaceTagBackgroundService
         executeState <- Running
 
         let mutable cacheSavedTime = DateTime.Now
-        let mutable noMoreMemoriesToTagCount = 0
 
         while not cancellationToken.IsCancellationRequested do
             if executeState = Running then
@@ -266,7 +267,8 @@ type FaceTagBackgroundService
                         noMoreMemoriesToTagCount <- 0
                         do! Task.Delay 100
                     else
-                        logger.LogWarning("No more memories to tag by face. Last processed memory {id}", lastProcessedMemoryId)
+                        if noMoreMemoriesToTagCount < 3 then
+                            logger.LogWarning("No more memories to tag by face. Last processed memory {id}", lastProcessedMemoryId)
                         // When running to the end of the memory table we should set this to false
                         // So it can only be toggled by folder watcher at runtime
                         isFamiliarFacesChanged <- false

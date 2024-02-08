@@ -1,5 +1,6 @@
 namespace Memory.Views.Components
 
+open System
 open System.IO
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Hosting
@@ -42,6 +43,10 @@ type MemoryMeta() as this =
                     }
                     p {
                         class' "font-semibold my-2"
+                        $"{Math.Round(float memory.FileSize/ 1024. / 1024., 2)}MB"
+                    }
+                    p {
+                        class' "font-semibold my-2"
                         memory.CreationTime.ToString("yyyy-MM-dd HH:mm:ss")
                     }
                     match memory.MemoryMeta with
@@ -59,7 +64,7 @@ type MemoryMeta() as this =
                                     Icons.MapPin(class' = "h-3 w-3")
                                     a {
                                         target "_blank"
-                                        href $"https://ditu.amap.com/regeo?lng={longitude}&lat={latitude}"
+                                        href $"https://ditu.amap.com/regeo?lng={Math.Round(longitude, 8)}&lat={Math.Round(latitude, 8)}"
                                         // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
                                         class' "link"
                                         $"%.8f{latitude}, %.8f{longitude}"

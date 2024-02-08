@@ -49,6 +49,7 @@ type Thumbnail() as this =
                                 .Add((fun x -> x.ExcludeYear), true)
                                 .Add((fun x -> x.Month), Nullable DateTime.Now.Month)
                                 .Add((fun x -> x.Day), Nullable DateTime.Now.Day)
+                                .Add("version", appOptions.Value.Version)
                         )
                     }
                 else

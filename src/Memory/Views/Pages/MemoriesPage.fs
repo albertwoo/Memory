@@ -273,10 +273,9 @@ type MemoriesPage() as this =
                                 )
                                 .Add(
                                     (fun x -> x.Month),
-                                    (if this.Month.HasValue && this.Month.Value > 0 then
-                                         this.Month.Value
-                                     else
-                                         DateTime.Now.Month)
+                                    (if this.Month.HasValue && this.Month.Value > 0 then this.Month.Value
+                                     else if this.Year.HasValue && this.Year.Value <> DateTime.Now.Year then 12
+                                     else DateTime.Now.Month)
                                 )
                                 .Add((fun x -> x.Day), this.Day)
                                 .Add((fun x -> x.Tags), this.SafeTags)

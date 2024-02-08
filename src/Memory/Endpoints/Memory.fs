@@ -29,8 +29,8 @@ type Memory =
                     if File.Exists file then
                         let contentType =
                             match transformedFormat fileName, fileName with
-                            | Some VideoFormat, _ -> "video/mp4"
-                            | Some ImageFormat, _ -> "image/webp"
+                            | Some VideoFormat, _ -> $"video/{AppOptions.OptimizedVideoFormat}"
+                            | Some ImageFormat, _ -> $"image/{AppOptions.OptimizedImageFormat}"
                             | _, Gif -> "image/gif"
                             | _ -> "*/*"
                         ctx.Response.Headers.CacheControl <- $"public, max-age={60 * 60 * 24 * 7}"

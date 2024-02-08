@@ -52,7 +52,7 @@ module private Meta =
         let degree = value[0].Numerator |> float
         let minutes = value[1].Numerator |> float
         let seconds = float value[2].Numerator / float value[2].Denominator
-        degree + minutes / 60.0 + Math.Round(seconds / 3600., 8)
+        Math.Round(degree + minutes / 60.0 + seconds / 3600., 8)
 
 
     let createOptimizedWebp (fromFile: string, toFile: string) = task {
@@ -66,13 +66,30 @@ module private Meta =
     }
 
 
-    /// Should convert any video to mp4 and generate image based on the first frame
-    let createOptimizedMp4 (ffmpegFile: string) (fromFile: string, toFile: string, toImageFile: string) =
+    /// Should convert any video to webm and generate image based on the first frame
+    let createOptimizedVideo (ffmpegFile: string) (fromFile: string, toFile: string, toImageFile: string) =
         use mediaFile = MediaFile.Open fromFile
+        let mutable height, width = 0, 0
 
         if mediaFile.HasVideo then
+            let shouldSwitchWH = int mediaFile.Video.Info.Rotation % 180 <> 0
+
+            height <-
+                if shouldSwitchWH then
+                    mediaFile.Video.Info.FrameSize.Width
+                else
+                    mediaFile.Video.Info.FrameSize.Height
+            width <-
+                if shouldSwitchWH then
+                    mediaFile.Video.Info.FrameSize.Height
+                else
+                    mediaFile.Video.Info.FrameSize.Width
+
             let imageData = mediaFile.Video.GetNextFrame()
             use image = Image.LoadPixelData<Bgr24>(imageData.Data, imageData.ImageSize.Width, imageData.ImageSize.Height)
+
+            if mediaFile.Video.Info.Rotation <> 0 then
+                image.Mutate(fun ctx -> ctx.Rotate(float32 mediaFile.Video.Info.Rotation) |> ignore)
 
             if image.Metadata.ExifProfile = null then
                 image.Metadata.ExifProfile <- ExifProfile()
@@ -81,8 +98,7 @@ module private Meta =
             |> Option.ofTryResult
             |> Option.iter (
                 function
-                | DATETIME creationTime ->
-                    image.Metadata.ExifProfile.SetValue(ExifTag.DateTimeOriginal, creationTime.ToString("yyyy:MM:dd HH:mm:ss"))
+                | DATETIME creationTime -> image.Metadata.ExifProfile.SetValue(ExifTag.DateTimeOriginal, creationTime.ToString("yyyy:MM:dd HH:mm:ss"))
                 | _ -> ()
             )
 
@@ -99,19 +115,18 @@ module private Meta =
 
             mediaFile.Info.Metadata.Metadata.TryGetValue "make"
             |> Option.ofTryResult
-            |> Option.defaultWithOption (fun () ->
-                mediaFile.Info.Metadata.Metadata.TryGetValue "com.apple.quicktime.make" |> Option.ofTryResult
-            )
+            |> Option.defaultWithOption (fun () -> mediaFile.Info.Metadata.Metadata.TryGetValue "com.apple.quicktime.make" |> Option.ofTryResult)
             |> Option.iter (fun make -> image.Metadata.ExifProfile.SetValue(ExifTag.Make, make))
 
             mediaFile.Info.Metadata.Metadata.TryGetValue "model"
             |> Option.ofTryResult
-            |> Option.defaultWithOption (fun () ->
-                mediaFile.Info.Metadata.Metadata.TryGetValue "com.apple.quicktime.model" |> Option.ofTryResult
-            )
+            |> Option.defaultWithOption (fun () -> mediaFile.Info.Metadata.Metadata.TryGetValue "com.apple.quicktime.model" |> Option.ofTryResult)
             |> Option.iter (fun make -> image.Metadata.ExifProfile.SetValue(ExifTag.Model, make))
 
             image.SaveAsWebp(toImageFile, WebpEncoder(Quality = 90))
+
+        else
+            failwith "No video in the file"
 
         let logLevel =
 #if DEBUG
@@ -120,10 +135,21 @@ module private Meta =
             "error"
 #endif
 
+        let hratio = float (Math.Min(height, 1920)) / float height
+        let wratio = float (Math.Min(width, 1920)) / float width
+        let ratio = Math.Min(hratio, wratio)
+        if ratio < 1. then
+            height <- int (float height * ratio)
+            width <- int (float width * ratio)
+
+        let makeEven x = if x % 2 = 0 then x else x + 1
+        height <- makeEven height
+        width <- makeEven width
+
         let processStartInfo = ProcessStartInfo()
         processStartInfo.FileName <- ffmpegFile
         processStartInfo.Arguments <-
-            $"""-i "{fromFile}" -c:v libx264 -c:a aac -b:v 100k -b:a 48k -preset fast -crf 28 -max_muxing_queue_size 1024 -y -vf "scale=w=min(1920\,iw):h=min(1080\,ih):force_original_aspect_ratio=decrease,fps=20" -strict -2 {toFile} -loglevel {logLevel}"""
+            $"""-i "{fromFile}" -c:v libx264 -c:a aac -b:v 0 -b:a 48k -preset fast -crf 28 -y -vf "scale=w={width}:h={height},fps=20,format=yuv420p" {toFile} -loglevel {logLevel}"""
 
         use ps = new Process()
         ps.StartInfo <- processStartInfo
@@ -153,7 +179,7 @@ module private Meta =
         firstFrame.Mutate(fun ctx ->
             ctx.Resize(ResizeOptions(Mode = ResizeMode.Crop, Size = Size(width = size, height = size), Compand = true)) |> ignore
         )
-        firstFrame.SaveAsWebpAsync(fileName, WebpEncoder(Quality = 75))
+        firstFrame.SaveAsWebpAsync(fileName, WebpEncoder(Quality = 90))
 
 
     let extractExifMeta (logger: ILogger) (profile: ExifProfile) (meta: MemoryMeta) =
@@ -199,22 +225,14 @@ module private Meta =
 
 
 type ``Insert or update memory meta handler``
-    (
-        appOptions: IOptions<AppOptions>,
-        env: IHostEnvironment,
-        memoryDb: MemoryDbContext,
-        logger: ILogger<``Insert or update memory meta handler``>
-    ) =
+    (appOptions: IOptions<AppOptions>, env: IHostEnvironment, memoryDb: MemoryDbContext, logger: ILogger<``Insert or update memory meta handler``>) =
 
     interface IRequestHandler<``Insert or update memory meta``, unit> with
         member _.Handle(request, cancellationToken) = task {
             let optimizedFolder = appOptions.Value.GetOptimizedFolder(env)
 
             let createThumbnail image (size: ThumbnailSize) =
-                Meta.createThumbnail
-                    image
-                    (size.ToPixel())
-                    (optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id, size.ToPixel()))
+                Meta.createThumbnail image (size.ToPixel()) (optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id, size.ToPixel()))
 
             let isSmallThumbnailFileExist =
                 optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id, ThumbnailSize.Small.ToPixel()) |> File.Exists
@@ -224,7 +242,7 @@ type ``Insert or update memory meta handler``
             if not isSmallThumbnailFileExist || meta = null then
                 logger.LogInformation("Start optimize memory {id} {file}", request.Id, request.File)
 
-                let webpFile = optimizedFolder </> string request.Id + ".webp"
+                let webpFile = optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id)
 
                 let! file = task {
                     // Optimized all files to webp
@@ -247,9 +265,9 @@ type ``Insert or update memory meta handler``
 
                     | VideoFormat ->
                         do!
-                            Meta.createOptimizedMp4
+                            Meta.createOptimizedVideo
                                 (appOptions.Value.FFmpegBinFolder </> "ffmpeg")
-                                (request.File, optimizedFolder </> string request.Id + ".mp4", webpFile)
+                                (request.File, optimizedFolder </> AppOptions.CreateOptimizedNameForVideo(request.Id), webpFile)
                         return webpFile
 
                     | _ ->

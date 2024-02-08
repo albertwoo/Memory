@@ -38,12 +38,13 @@ type MemoryDetail() as this =
                         childContent [|
                             match memory.FileExtension with
                             | VideoFormat -> video {
+                                loop
                                 controls
                                 autoplay
-                                loop
-                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
+                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30 overflow-hidden"
                                 poster (AppOptions.CreateOptimizedUrlForImage(this.Id) |> appOptions.Value.AppendWithVersion)
                                 source {
+                                    type' $"video/{AppOptions.OptimizedVideoFormat}"
                                     src (
                                         match transformedFormat memory.FileExtension with
                                         | None -> $"/memory/original/{memory.Id}"
@@ -54,7 +55,7 @@ type MemoryDetail() as this =
                               }
                             | ImageFormat -> img {
                                 openMetaAttr
-                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
+                                class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30 overflow-hidden"
                                 src (
                                     match transformedFormat memory.FileExtension with
                                     | None -> $"/memory/original/{memory.Id}"
