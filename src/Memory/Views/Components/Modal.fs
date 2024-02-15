@@ -93,7 +93,7 @@ type Modal =
             let dialogContent =
                 div {
                     on.click "event.stopPropagation()"
-                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:rounded-none md:rounded-lg sm:gap-2 {sizeClasses}"
+                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 rounded-none sm:rounded-lg sm:gap-2  {sizeClasses}"
                     style { cssRules.FadeInUpCss() }
                     childContent [|
                         h3 {
