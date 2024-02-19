@@ -49,7 +49,7 @@ type Modal =
 
             let sizeClasses =
                 match modalSize with
-                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20 px-0 sm:px-2"
+                | ModalSize.Full -> "w-full sm:w-[calc(100%-80px)] max-w-full h-full sm:h-[calc(100%-80px)] max-h-full sm:border sm:border-primary/20 px-0 sm:px-2 rounded-none sm:rounded-lg"
                 | ModalSize.Medium -> "border border-primary/20"
 
             let removeModalJs = 
@@ -93,7 +93,7 @@ type Modal =
             let dialogContent =
                 div {
                     on.click "event.stopPropagation()"
-                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 rounded-none sm:rounded-lg sm:gap-2  {sizeClasses}"
+                    class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2  {sizeClasses}"
                     style { cssRules.FadeInUpCss() }
                     childContent [|
                         h3 {
