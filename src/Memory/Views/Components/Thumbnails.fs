@@ -100,7 +100,7 @@ type Thumbnail() as this =
                         name (nameof Unchecked.defaultof<BatchTagsIndicatorBtn>.IncludeSelectedId)
 
                         type' InputTypes.checkbox
-                        on.click "event.stopPropagation()"
+                        onclick "event.stopPropagation()"
                         class'
                             $"{BatchTagsModal.ThumbnailChecker} absolute right-0 bottom-0 checkbox checkbox-primary border-2 opacity-0 sm:opacity-70 sm:hidden sm:group-hover:block checked:opacity-70 checked:block"
                     }

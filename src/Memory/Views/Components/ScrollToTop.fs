@@ -7,6 +7,6 @@ type ScrollToTop =
 
     static member Btn() = button {
         class' "btn btn-circle btn-primary shadow-md opacity-70 hover:opacity-100"
-        on.click "window.scrollTo({top: 0, behavior: 'smooth'});"
+        onclick "window.scrollTo({top: 0, behavior: 'smooth'});"
         Icons.DoubleUp()
     }

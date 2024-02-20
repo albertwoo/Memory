@@ -87,12 +87,12 @@ type Modal =
             let closeAttr = domAttr { 
                 tabindex 0
                 autofocus
-                on.click removeModalJs 
+                onclick removeModalJs 
             }
 
             let dialogContent =
                 div {
-                    on.click "event.stopPropagation()"
+                    onclick "event.stopPropagation()"
                     class' $"modal-box bg-base-100/90 p-2 md:p-5 flex flex-col items-stretch overflow-hidden gap-1 sm:gap-2  {sizeClasses}"
                     style { cssRules.FadeInUpCss() }
                     childContent [|

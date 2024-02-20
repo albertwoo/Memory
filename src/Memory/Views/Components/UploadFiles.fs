@@ -229,7 +229,7 @@ type UploadFilesModal() =
             actions = fragment {
                 button {
                     class' "link"
-                    on.click (NativeJs.ReloadPage())
+                    onclick (NativeJs.ReloadPage())
                     "Refresh"
                 }
             }
