@@ -73,38 +73,36 @@ type Thumbnail() as this =
                 )
                 style { cssRules.FadeInUpCss() }
 
-                childContent [|
-                    img {
-                        class' ("pointer-events-none " + this.ThumbnailSizeClass)
-                        src (AppOptions.CreateOptimizedUrlForImage(this.Id, this.ViewSize.ToPixel()) |> appOptions.Value.AppendWithVersion)
-                    }
-                    span {
-                        class' (
-                            "absolute right-0 top-0 badge badge-xs uppercase pointer-events-none focus:opacity-80 "
-                            + (
-                                match this.FileExtension with
-                                | VideoFormat -> "opacity-40 sm:group-hover:opacity-80"
-                                | _ -> "badge-secondary opacity-0 sm:hidden sm:group-hover:inline-block"
-                            )
+                img {
+                    class' ("pointer-events-none " + this.ThumbnailSizeClass)
+                    src (AppOptions.CreateOptimizedUrlForImage(this.Id, this.ViewSize.ToPixel()) |> appOptions.Value.AppendWithVersion)
+                }
+                span {
+                    class' (
+                        "absolute right-0 top-0 badge badge-xs uppercase pointer-events-none focus:opacity-80 "
+                        + (
+                            match this.FileExtension with
+                            | VideoFormat -> "opacity-40 sm:group-hover:opacity-80"
+                            | _ -> "badge-secondary opacity-0 sm:hidden sm:group-hover:inline-block"
                         )
-                        if String.IsNullOrEmpty this.FileExtension |> not then
-                            this.FileExtension.Substring(1)
-                    }
-                    progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-bars w-full h-full p-2" }
-                    input {
-                        hxTrigger hxEvt.mouse.click
-                        hxGetComponent (QueryBuilder<BatchTagsIndicatorBtn>().Add((fun x -> x.SelectedId), Nullable this.Id))
-                        hxInclude $"#{BatchTagsIndicatorBtn.Id}"
-                        hxTarget $"#{BatchTagsIndicatorBtn.Id}"
-                        hxSwap_outerHTML
-                        name (nameof Unchecked.defaultof<BatchTagsIndicatorBtn>.IncludeSelectedId)
+                    )
+                    if String.IsNullOrEmpty this.FileExtension |> not then
+                        this.FileExtension.Substring(1)
+                }
+                progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-bars w-full h-full p-2" }
+                input {
+                    hxTrigger hxEvt.mouse.click
+                    hxGetComponent (QueryBuilder<BatchTagsIndicatorBtn>().Add((fun x -> x.SelectedId), Nullable this.Id))
+                    hxInclude $"#{BatchTagsIndicatorBtn.Id}"
+                    hxTarget $"#{BatchTagsIndicatorBtn.Id}"
+                    hxSwap_outerHTML
+                    name (nameof Unchecked.defaultof<BatchTagsIndicatorBtn>.IncludeSelectedId)
 
-                        type' InputTypes.checkbox
-                        onclick "event.stopPropagation()"
-                        class'
-                            $"{BatchTagsModal.ThumbnailChecker} absolute right-0 bottom-0 checkbox checkbox-primary border-2 opacity-0 sm:opacity-70 sm:hidden sm:group-hover:block checked:opacity-70 checked:block"
-                    }
-                |]
+                    type' InputTypes.checkbox
+                    onclick "event.stopPropagation()"
+                    class'
+                        $"{BatchTagsModal.ThumbnailChecker} absolute right-0 bottom-0 checkbox checkbox-primary border-2 opacity-0 sm:opacity-70 sm:hidden sm:group-hover:block checked:opacity-70 checked:block"
+                }
             }
         )
 
@@ -175,7 +173,7 @@ type Thumbnails() as this =
                     )
                     |> mediator.Send
 
-                return html.fragment [|
+                return fragment {
                     for memory in memories do
                         html.blazor (
                             ComponentAttrBuilder<Thumbnail>()
@@ -186,7 +184,7 @@ type Thumbnails() as this =
                         )
                     // If still got data
                     if this.Count.Value > (offset + memories.LongCount()) then this.RestThumbnails()
-                |]
+                }
 
             with :? ArgumentOutOfRangeException as e when e.Message.Contains "DateTime" ->
                 return html.none
@@ -217,11 +215,7 @@ type ThumbnailsByDay() as this =
             let lastDayInMonth = DateTime.DaysInMonth(this.Year, this.Month)
 
             let! memories =
-                Domain.``Get memory counts by month with filter and ordered by day desc`` (
-                    this.Year,
-                    this.Month,
-                    Tags = this.Tags.Value
-                )
+                Domain.``Get memory counts by month with filter and ordered by day desc`` (this.Year, this.Month, Tags = this.Tags.Value)
                 |> mediator.Send
 
             let createQuery () =
@@ -237,7 +231,7 @@ type ThumbnailsByDay() as this =
                     .Add(GlobalQuery.Month, this.Month)
                     .Add(GlobalQuery.Tags, this.Tags)
 
-            return html.fragment [|
+            return fragment {
                 a {
                     target "_blank"
                     href ("?" + createQuery().ToString())
@@ -272,7 +266,7 @@ type ThumbnailsByDay() as this =
                         }
                     else
                         heatView true
-            |]
+            }
         })
 
 
@@ -324,19 +318,17 @@ type ThumbnailsByMonth() as this =
                 )
                 class' "relative block"
                 style { cssRules.FadeInUpCss() }
-                childContent [|
-                    div {
-                        class' "bg-success h-full absolute top-0"
-                        style {
-                            width $"{percent * 100.}%%"
-                            left $"{(100. - percent * 100.) / 2.}%%"
-                            opacity (Math.Max((if percent > 0 then 0.15 else 0.05), percent))
-                        }
+                div {
+                    class' "bg-success h-full absolute top-0"
+                    style {
+                        width $"{percent * 100.}%%"
+                        left $"{(100. - percent * 100.) / 2.}%%"
+                        opacity (Math.Max((if percent > 0 then 0.15 else 0.05), percent))
                     }
-                    h3 {
-                        class' "font-semibold text-center text-primary text-xs"
-                        this.Month
-                    }
-                |]
+                }
+                h3 {
+                    class' "font-semibold text-center text-primary text-xs"
+                    this.Month
+                }
             }
         })

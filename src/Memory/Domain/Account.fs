@@ -12,7 +12,7 @@ type AccountUtils =
         BitConverter.ToString(md5.ComputeHash(Encoding.ASCII.GetBytes($"{name.ToLower()}#{password}")))
 
     static member MaxRetryBeforeLockout = 3
-    static member LockoutDuration = TimeSpan.FromMinutes(15)
+    static member LockoutDuration = TimeSpan.FromMinutes(15L)
 
 
 [<RequireQualifiedAccess>]

@@ -30,8 +30,8 @@ type BatchTagsModal() as this =
     override _.Render() =
         html.inject (fun (mediator: IMediator) -> task {
             if this.Submit && this.Ids.Value.Length > 0 && this.Tags.Value.Length > 0 then
-                do! Domain.``Add tag to memeory``(this.Ids.Value, this.Tags.Value) |> mediator.Send
-                
+                do! Domain.``Add tag to memeory`` (this.Ids.Value, this.Tags.Value) |> mediator.Send
+
                 return script {
                     hxTrigger hxEvt.load
                     hxGetComponent typeof<BatchTagsIndicatorBtn>
@@ -49,19 +49,17 @@ type BatchTagsModal() as this =
                             id this.FormId
                             hxGetComponent (QueryBuilder<TagFilterList>().Add((fun x -> x.SelectedTagsParamName), nameof this.Tags))
                             class' "flex flex-wrap items-center gap-2 mt-2"
-                            html.blazor(ComponentAttrBuilder<TagFilterList>().Add((fun x -> x.SelectedTagsParamName), nameof this.Tags))
+                            html.blazor (ComponentAttrBuilder<TagFilterList>().Add((fun x -> x.SelectedTagsParamName), nameof this.Tags))
                         },
                         actions = fragment {
                             button {
                                 hxTrigger hxEvt.mouse.click
-                                hxUpdateModal (
-                                    QueryBuilder<BatchTagsModal>().Add(this).Add((fun x -> x.Submit), true)
-                                )
+                                hxUpdateModal (QueryBuilder<BatchTagsModal>().Add(this).Add((fun x -> x.Submit), true))
                                 hxInclude $"#{this.FormId}"
-                               
+
                                 disabled this.Ids.Value.IsEmpty
                                 class' "btn btn-primary btn-ghost"
-                               
+
                                 "Confirm"
                             }
                         },
@@ -72,7 +70,7 @@ type BatchTagsModal() as this =
 
 type BatchTagsIndicatorBtn() as this =
     inherit FunComponent()
-      
+
     [<Parameter>]
     member val SelectedIds = Parsable List.empty<int64> with get, set
 
@@ -90,9 +88,9 @@ type BatchTagsIndicatorBtn() as this =
 
 
     override _.Render() =
-        let selectedIds = 
+        let selectedIds =
             if this.SelectedId.HasValue && this.IncludeSelectedId = "on" then
-                [this.SelectedId.Value] |> List.append this.SelectedIds.Value
+                [ this.SelectedId.Value ] |> List.append this.SelectedIds.Value
             else if this.SelectedId.HasValue then
                 this.SelectedIds.Value |> List.filter ((<>) this.SelectedId.Value)
             else
@@ -108,21 +106,18 @@ type BatchTagsIndicatorBtn() as this =
             id BatchTagsIndicatorBtn.Id
             hxTrigger hxEvt.mouse.click
             hxModal (QueryBuilder<BatchTagsModal>().Add((fun x -> x.Ids), this.SelectedIds))
-            
+
             class' "btn btn-circle shadow-md opacity-70 hover:opacity-100 relative"
-            
-            childContent [|
-                // So other components can include this parameters for htmx
-                input {
-                    type' InputTypes.hidden
-                    name (nameof this.SelectedIds)
-                    value this.SelectedIds
-                }
-                
-                Icons.Tag()
 
-                progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-spinner w-full h-full p-1" }
-
+            // So other components can include this parameters for htmx
+            input {
+                type' InputTypes.hidden
+                name (nameof this.SelectedIds)
+                value this.SelectedIds
+            }
+            Icons.Tag()
+            progress { class' "htmx-indicator absolute left-0 top-0 right-0 bottom-0 loading loading-spinner w-full h-full p-1" }
+            region {
                 // Indicator
                 if count > 0 then
                     div {
@@ -132,14 +127,14 @@ type BatchTagsIndicatorBtn() as this =
                             if count > 99 then "99+" else string count
                         }
                     }
-            |]
+            }
         }
 
-        
+
     static member Id = "batch-tags-indicator-btn"
     static member BatchSelectionBtnId = "batch-tags-selection-btn"
 
-    static member Scripts() = html.fragment [|
+    static member Scripts() = fragment {
         button {
             id BatchTagsIndicatorBtn.BatchSelectionBtnId
             hxTrigger hxEvt.mouse.click
@@ -188,4 +183,4 @@ type BatchTagsIndicatorBtn() as this =
             });
             """
         }
-    |]
+    }

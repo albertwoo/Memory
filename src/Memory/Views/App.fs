@@ -15,53 +15,53 @@ type App() =
 
     override _.Render() =
         html.inject (fun (appOptions: IOptions<AppOptions>) ->
-            let head =
-                head.create [|
-                    baseUrl "/"
-                    meta { charset "utf-8" }
-                    meta {
-                        name "viewport"
-                        content "width=device-width, initial-scale=1.0"
-                    }
-                    link {
-                        rel "icon"
-                        type' "image/png"
-                        href ("favicon.png" |> appOptions.Value.AppendWithVersion)
-                    }
+            let head = head {
+                baseUrl "/"
+                meta { charset "utf-8" }
+                meta {
+                    name "viewport"
+                    content "width=device-width, initial-scale=1.0"
+                }
+                link {
+                    rel "icon"
+                    type' "image/png"
+                    href ("favicon.png" |> appOptions.Value.AppendWithVersion)
+                }
 
-                    stylesheet ("app-generated.css" |> appOptions.Value.AppendWithVersion)
-                    html.scopedCssRules
+                stylesheet ("app-generated.css" |> appOptions.Value.AppendWithVersion)
+                html.scopedCssRules
 
-                    HeadOutlet'.create ()
-                    CustomElement.lazyBlazorJs ()
-                |]
+                HeadOutlet''
+                CustomElement.lazyBlazorJs ()
+            }
 
-            let body =
-                body.create [|
-                    Modal.Container()
-                    section {
-                        class' "flex flex-col items-center justify-center"
-                        childContent [| Landing.Title(); Landing.SubTitle() |]
-                    }
-                    Router'() {
-                        AppAssembly(Assembly.GetExecutingAssembly())
-                        Found(fun routeData ->
-                            html.blazor (
-                                ComponentAttrBuilder<AuthorizeRouteView>()
-                                    .Add((fun x -> x.RouteData), routeData)
-                                    .Add((fun x -> x.NotAuthorized), html.renderFragment (fun _ -> html.blazor<Pages.LoginPage> ()))
-                            )
+            let body = body {
+                Modal.Container()
+                section {
+                    class' "flex flex-col items-center justify-center"
+                    Landing.Title()
+                    Landing.SubTitle()
+                }
+                Router'' {
+                    AppAssembly(Assembly.GetExecutingAssembly())
+                    Found(fun routeData ->
+                        html.blazor (
+                            ComponentAttrBuilder<AuthorizeRouteView>()
+                                .Add((fun x -> x.RouteData), routeData)
+                                .Add((fun x -> x.NotAuthorized), html.renderFragment (fun _ -> html.blazor<Pages.LoginPage> ()))
                         )
-                    }
-                    script { src "htmx.org@1.9.9.js" }
-                |]
-                
-            html.fragment [|
+                    )
+                }
+                script { src "htmx.org@1.9.9.js" }
+            }
+
+            fragment {
                 doctype "html"
                 html' {
                     lang "CN"
                     data "theme" appOptions.Value.Theme
-                    childContent [| head; body |]
+                    head
+                    body
                 }
-            |]
+            }
         )

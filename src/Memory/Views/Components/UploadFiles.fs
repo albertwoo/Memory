@@ -144,34 +144,31 @@ type UploadFiles() as this =
         id this.FormId
         hxPostComponent typeof<UploadFiles>
         enctype "multipart/form-data"
-        childContent [|
-            html.blazor<AntiforgeryToken> ()
 
-            div {
-                class' "join w-full"
-                childContent [|
-                    label {
-                        class' "join-item form-control w-full"
-                        input {
-                            id this.FileInputId
-                            class' "join-item file-input file-input-bordered w-full"
-                            type' InputTypes.file
-                            multiple true
-                            name "files"
-                        }
-                    }
-                    button {
-                        class' "join-item btn btn-primary"
-                        type' InputTypes.submit
-                        "Upload"
-                    }
-                |]
+        html.blazor<AntiforgeryToken> ()
+
+        div {
+            class' "join w-full"
+            label {
+                class' "join-item form-control w-full"
+                input {
+                    id this.FileInputId
+                    class' "join-item file-input file-input-bordered w-full"
+                    type' InputTypes.file
+                    multiple true
+                    name "files"
+                }
             }
+            button {
+                class' "join-item btn btn-primary"
+                type' InputTypes.submit
+                "Upload"
+            }
+        }
 
-            progress { class' "htmx-indicator progress progress-primary" }
-            script { NativeJs.AppendFileCreationHiddenFields($"#{this.FormId}", $"#{this.FileInputId}") }
-            defaultArg message html.none
-        |]
+        progress { class' "htmx-indicator progress progress-primary" }
+        script { NativeJs.AppendFileCreationHiddenFields($"#{this.FormId}", $"#{this.FileInputId}") }
+        defaultArg message html.none
     }
 
     member _.ResultMessageView = 
@@ -182,17 +179,15 @@ type UploadFiles() as this =
           }
         | Error (es: string list) -> div {
             class' "text-error text-center"
-            childContent [|
-                p {
-                    class' "text-lg"
-                    "Uploaded failed"
-                }
-                ul {
-                    class' "text-sm"
-                    for e in es do
-                        li { e }
-                }
-            |]
+            p {
+                class' "text-lg"
+                "Uploaded failed"
+            }
+            ul {
+                class' "text-sm"
+                for e in es do
+                    li { e }
+            }
           }
 
 

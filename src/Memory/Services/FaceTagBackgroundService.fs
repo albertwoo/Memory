@@ -253,7 +253,7 @@ type FaceTagBackgroundService
         while not cancellationToken.IsCancellationRequested do
             if executeState = Running then
                 // With this we can avoid tag face which is already been process when we restart our service
-                if DateTime.Now - cacheSavedTime > TimeSpan.FromMinutes 15 then
+                if DateTime.Now - cacheSavedTime > TimeSpan.FromMinutes 15L then
                     this.SaveCache()
                     cacheSavedTime <- DateTime.Now
 

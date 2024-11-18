@@ -35,7 +35,7 @@ type MemoryMeta() as this =
                     )
                     |> Option.defaultWith (fun () -> Path.GetFileName memory.FilePath)
 
-                return div.create [
+                return div {
                     h3 {
                         class' "text-xl text-primary font-bold"
                         style { "overflow-wrap", "break-word" }
@@ -43,7 +43,7 @@ type MemoryMeta() as this =
                     }
                     p {
                         class' "font-semibold my-2"
-                        $"{Math.Round(float memory.FileSize/ 1024. / 1024., 2)}MB"
+                        $"{Math.Round(float memory.FileSize / 1024. / 1024., 2)}MB"
                     }
                     p {
                         class' "font-semibold my-2"
@@ -54,27 +54,23 @@ type MemoryMeta() as this =
                     | memoryMeta -> section {
                         class' "text-sm mt-2"
                         style { cssRules.FadeInUpCss() }
-                        childContent [|
-                            p { memoryMeta.Make + " " + memoryMeta.Modal }
-                            p { memoryMeta.LensModal }
-                            match Option.ofNullable memoryMeta.Latitude, Option.ofNullable memoryMeta.Longitude with
-                            | Some latitude, Some longitude -> p {
-                                class' "flex items-center gap-2"
-                                childContent [|
-                                    Icons.MapPin(class' = "h-3 w-3")
-                                    a {
-                                        target "_blank"
-                                        href $"https://ditu.amap.com/regeo?lng={Math.Round(longitude, 8)}&lat={Math.Round(latitude, 8)}"
-                                        // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
-                                        class' "link"
-                                        $"%.8f{latitude}, %.8f{longitude}"
-                                    }
-                                |]
-                              }
-                            | _ -> ()
-                        |]
+                        p { memoryMeta.Make + " " + memoryMeta.Modal }
+                        p { memoryMeta.LensModal }
+                        match Option.ofNullable memoryMeta.Latitude, Option.ofNullable memoryMeta.Longitude with
+                        | Some latitude, Some longitude -> p {
+                            class' "flex items-center gap-2"
+                            Icons.MapPin(class' = "h-3 w-3")
+                            a {
+                                target "_blank"
+                                href $"https://ditu.amap.com/regeo?lng={Math.Round(longitude, 8)}&lat={Math.Round(latitude, 8)}"
+                                // href $"https://cn.bing.com/maps?cp={memoryMeta.Latitude}~{memoryMeta.Longitude}&lvl=17"
+                                class' "link"
+                                $"%.8f{latitude}, %.8f{longitude}"
+                            }
+                          }
+                        | _ -> ()
                       }
-                ]
+                }
         })
 
 

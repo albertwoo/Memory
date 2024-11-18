@@ -166,7 +166,7 @@ module private Meta =
                 ()
 
         task {
-            ps.WaitForExit(TimeSpan.FromMinutes 60) |> ignore
+            ps.WaitForExit(TimeSpan.FromMinutes 60L) |> ignore
             if ps.ExitCode <> 0 then
                 cleanup ()
                 failwith "FFmpeg process failed"

@@ -41,15 +41,13 @@ type TagItem() as this =
                     hxPostComponent (QueryBuilder<TagItem>().Add(this).Add((fun x -> x.IsDeleting), true))
                     hxSwap_outerHTML
                     class' $"group text-neutral-600 bg-warning px-2 py-1 text-sm flex items-center gap-1 {TagItem.RotateClass}"
-                    childContent [|
-                        html.blazor<AntiforgeryToken> ()
-                        label { this.Name }
-                        button {
-                            type' InputTypes.submit
-                            class' "hidden group-hover:block btn btn-xs btn-ghost btn-circle btn-error"
-                            Icons.Clear()
-                        }
-                    |]
+                    html.blazor<AntiforgeryToken> ()
+                    label { this.Name }
+                    button {
+                        type' InputTypes.submit
+                        class' "hidden group-hover:block btn btn-xs btn-ghost btn-circle btn-error"
+                        Icons.Clear()
+                    }
                 }
         })
 
@@ -73,24 +71,21 @@ type TagCreation() as this =
     member _.Form() = form {
         hxPostComponent (QueryBuilder<TagCreation>().Add(this))
         hxSwap_outerHTML
-        childContent [|
-            html.blazor<AntiforgeryToken> ()
-            input {
-                type' InputTypes.text
-                class' "input input-sm input-bordered w-[100px]"
-                name (nameof this.Name)
-                autofocus
-                tabindex 0
-            }
-            input {
-                hxTrigger' (hxEvt.keyboard.keyup + "[key=='Escape']", from = "body")
-                hxGetComponent (QueryBuilder<TagCreation>().Add(this).Add((fun x -> x.IsEditing), false).Remove(fun x -> x.Name))
-                hxTarget "closest form"
-                hxSwap_outerHTML
-                type' InputTypes.hidden
-            }
-        
-        |]
+        html.blazor<AntiforgeryToken> ()
+        input {
+            type' InputTypes.text
+            class' "input input-sm input-bordered w-[100px]"
+            name (nameof this.Name)
+            autofocus
+            tabindex 0
+        }
+        input {
+            hxTrigger' (hxEvt.keyboard.keyup + "[key=='Escape']", from = "body")
+            hxGetComponent (QueryBuilder<TagCreation>().Add(this).Add((fun x -> x.IsEditing), false).Remove(fun x -> x.Name))
+            hxTarget "closest form"
+            hxSwap_outerHTML
+            type' InputTypes.hidden
+        }
     }
 
     member _.Creation() = button {
@@ -110,15 +105,13 @@ type TagCreation() as this =
                 if not isTagExist then
                     do! Domain.``Add tag to memeory`` ([ this.MemoryId ], [ this.Name ]) |> mediator.Send
 
-                return html.fragment [|
+                return fragment {
                     if not isTagExist then
                         html.blazor (
-                            ComponentAttrBuilder<TagItem>()
-                                .Add((fun x -> x.MemoryId), this.MemoryId)
-                                .Add((fun x -> x.Name), this.Name)
+                            ComponentAttrBuilder<TagItem>().Add((fun x -> x.MemoryId), this.MemoryId).Add((fun x -> x.Name), this.Name)
                         )
                     this.Creation()
-                |]
+                }
 
             | NullOrEmptyString, true -> return this.Form()
 
@@ -139,19 +132,11 @@ type TagLists() as this =
     override _.Render() =
         html.inject (fun (memoryDb: MemoryDbContext) -> task {
             let! tags =
-                memoryDb.MemoryTags
-                    .AsNoTracking()
-                    .Where(fun x -> x.MemoryId = this.MemoryId)
-                    .Select(fun x -> x.Tag.Name)
-                    .ToListAsync()
+                memoryDb.MemoryTags.AsNoTracking().Where(fun x -> x.MemoryId = this.MemoryId).Select(fun x -> x.Tag.Name).ToListAsync()
 
-            return html.fragment [|
+            return fragment {
                 for tag in tags do
-                    html.blazor (
-                        ComponentAttrBuilder<TagItem>()
-                            .Add((fun x -> x.MemoryId), this.MemoryId)
-                            .Add((fun x -> x.Name), tag)
-                    )
+                    html.blazor (ComponentAttrBuilder<TagItem>().Add((fun x -> x.MemoryId), this.MemoryId).Add((fun x -> x.Name), tag))
 
                 if this.EnableEdit then
                     html.blazor (
@@ -159,7 +144,7 @@ type TagLists() as this =
                             .Add((fun x -> x.MemoryId), this.MemoryId)
                             .Add((fun x -> x.ExistingTags), TagUtils.ToString tags)
                     )
-            |]
+            }
         })
 
 
@@ -178,8 +163,8 @@ type TagFilterList() as this =
     override _.Render() =
         html.inject (fun (memoryDb: MemoryDbContext) -> task {
             let! tags = memoryDb.Tags.AsNoTracking().ToListAsync()
-            
-            return html.fragment [|
+
+            return fragment {
                 // So other components can include this params for htmx
                 if String.IsNullOrEmpty this.SelectedTagsParamName |> not then
                     input {
@@ -189,8 +174,7 @@ type TagFilterList() as this =
                     }
                 for tag in tags do
                     let isSelected =
-                        this.SelectedTags.Value
-                        |> Seq.exists (fun x -> x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase))
+                        this.SelectedTags.Value |> Seq.exists (fun x -> x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase))
                     let selectedClass = if isSelected then "bg-warning" else ""
                     button {
                         name (
@@ -205,13 +189,14 @@ type TagFilterList() as this =
                                 |> List.filter (fun x -> x.Equals(tag.Name, StringComparison.OrdinalIgnoreCase) |> not)
                                 |> Parsable
                             else if this.SelectedTags.Value.Length > 0 then
-                                Parsable (this.SelectedTags.Value @[ tag.Name])
+                                Parsable(this.SelectedTags.Value @ [ tag.Name ])
                             else
                                 Parsable [ tag.Name ]
                         )
                         type' InputTypes.submit
-                        class' $"text-neutral-600 px-2 py-1 text-sm flex items-center gap-1 hover:bg-warning {selectedClass} {TagItem.RotateClass}"
+                        class'
+                            $"text-neutral-600 px-2 py-1 text-sm flex items-center gap-1 hover:bg-warning {selectedClass} {TagItem.RotateClass}"
                         tag.Name
                     }
-            |]
+            }
         })

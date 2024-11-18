@@ -43,50 +43,50 @@ type ResetPasswordPage() as this =
         hxPostComponent (QueryBuilder<ResetPasswordPage>().Add((fun x -> x.IsFirstLoad), false))
         hxSwap_outerHTML
         class' "mx-auto rounded-md shadow-md shadow-neutral-500/30 my-10 w-[300px] flex flex-col gap-4 border-primary/20 p-5"
-        childContent [|
-            PageTitle'() { "Reset" }
-            html.blazor<AntiforgeryToken> ()
 
-            input {
-                class' "input input-bordered input-primary w-full"
-                placeholder "Name"
-                type' InputTypes.text
-                name (nameof this.Name)
-                value this.Name
-            }
-            input {
-                class' "input input-bordered input-primary w-full"
-                placeholder "Old password"
-                type' InputTypes.password
-                name (nameof this.Password)
-                value this.Password
-            }
-            input {
-                class' "input input-bordered input-primary w-full"
-                placeholder "New password"
-                type' InputTypes.password
-                name (nameof this.NewPassword)
-                value this.NewPassword
-            }
-            input {
-                class' "input input-bordered input-primary w-full"
-                placeholder "Confirm password"
-                type' InputTypes.password
-                name (nameof this.ConfirmNewPassword)
-                value this.ConfirmNewPassword
-            }
-            button {
-                class' "btn btn-primary w-full"
-                type' InputTypes.submit
-                "Reset"
-            }
+        PageTitle'() { "Reset" }
 
-            if not this.IsFirstLoad && this.IsInvalidForReset then
-                div {
-                    class' "text-error text-center"
-                    "Invalid credential"
-                }
-        |]
+        html.blazor<AntiforgeryToken> ()
+
+        input {
+            class' "input input-bordered input-primary w-full"
+            placeholder "Name"
+            type' InputTypes.text
+            name (nameof this.Name)
+            value this.Name
+        }
+        input {
+            class' "input input-bordered input-primary w-full"
+            placeholder "Old password"
+            type' InputTypes.password
+            name (nameof this.Password)
+            value this.Password
+        }
+        input {
+            class' "input input-bordered input-primary w-full"
+            placeholder "New password"
+            type' InputTypes.password
+            name (nameof this.NewPassword)
+            value this.NewPassword
+        }
+        input {
+            class' "input input-bordered input-primary w-full"
+            placeholder "Confirm password"
+            type' InputTypes.password
+            name (nameof this.ConfirmNewPassword)
+            value this.ConfirmNewPassword
+        }
+        button {
+            class' "btn btn-primary w-full"
+            type' InputTypes.submit
+            "Reset"
+        }
+
+        if not this.IsFirstLoad && this.IsInvalidForReset then
+            div {
+                class' "text-error text-center"
+                "Invalid credential"
+            }
     }
 
     override _.Render() =
@@ -101,13 +101,13 @@ type ResetPasswordPage() as this =
                 | true ->
                     do! ctx.HttpContext.SignOutAsync()
 
-                    return div.create [
+                    return div {
                         script { NativeJs.GoTo("/account/login") }
                         p {
                             class' "text-success text-3xl opacity-75 mt-20 text-center"
                             "Success, redirecting..."
                         }
-                    ]
+                    }
 
                 | false -> return this.Form()
         })
