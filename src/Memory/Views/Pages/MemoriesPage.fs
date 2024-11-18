@@ -200,7 +200,7 @@ type MemoriesPage() as this =
 
             return main {
                 id this.PageId
-                PageTitle'() { appOptions.Value.Title }
+                PageTitle'' { appOptions.Value.Title }
                 section {
                     class' "flex flex-col items-center justify-center sticky top-1 gap-1 z-50"
                     div {

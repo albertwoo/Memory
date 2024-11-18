@@ -44,7 +44,7 @@ type ResetPasswordPage() as this =
         hxSwap_outerHTML
         class' "mx-auto rounded-md shadow-md shadow-neutral-500/30 my-10 w-[300px] flex flex-col gap-4 border-primary/20 p-5"
 
-        PageTitle'() { "Reset" }
+        PageTitle'' { "Reset" }
 
         html.blazor<AntiforgeryToken> ()
 

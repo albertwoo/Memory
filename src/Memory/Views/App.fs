@@ -8,14 +8,23 @@ open Fun.Blazor
 open Memory.Options
 open Memory.Views
 open Memory.Views.Components
+open Microsoft.AspNetCore.Components
 
 
-type App() =
+type App() as this =
     inherit FunComponent()
 
-    override _.Render() =
-        html.inject (fun (appOptions: IOptions<AppOptions>) ->
-            let head = head {
+
+    [<Inject>]
+    member val AppOptions = Unchecked.defaultof<IOptions<AppOptions>> with get, set
+
+
+    override _.Render() = fragment {
+        doctype "html"
+        html' {
+            lang "CN"
+            data "theme" this.AppOptions.Value.Theme
+            head {
                 baseUrl "/"
                 meta { charset "utf-8" }
                 meta {
@@ -25,17 +34,16 @@ type App() =
                 link {
                     rel "icon"
                     type' "image/png"
-                    href ("favicon.png" |> appOptions.Value.AppendWithVersion)
+                    href ("favicon.png" |> this.AppOptions.Value.AppendWithVersion)
                 }
 
-                stylesheet ("app-generated.css" |> appOptions.Value.AppendWithVersion)
+                stylesheet ("app-generated.css" |> this.AppOptions.Value.AppendWithVersion)
                 html.scopedCssRules
 
                 HeadOutlet''
                 CustomElement.lazyBlazorJs ()
             }
-
-            let body = body {
+            body {
                 Modal.Container()
                 section {
                     class' "flex flex-col items-center justify-center"
@@ -54,14 +62,5 @@ type App() =
                 }
                 script { src "htmx.org@1.9.9.js" }
             }
-
-            fragment {
-                doctype "html"
-                html' {
-                    lang "CN"
-                    data "theme" appOptions.Value.Theme
-                    head
-                    body
-                }
-            }
-        )
+        }
+    }
