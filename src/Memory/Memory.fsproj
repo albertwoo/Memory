@@ -47,12 +47,12 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.1.35" />
 
-		<PackageReference Include="Fun.Blazor.Microsoft.Authorization" Version="9.0.0" />
-		<PackageReference Include="Fun.Blazor.Microsoft.Web" Version="9.0.0" />
-		<PackageReference Include="Fun.Htmx" Version="4.1.0" />
-		<PackageReference Include="Fun.Blazor" Version="4.1.1" />
-		<PackageReference Include="Fun.Blazor.Server" Version="4.1.0" />
-		<PackageReference Include="Fun.Blazor.CustomElements" Version="4.1.0" />
+		<PackageReference Include="Fun.Htmx" Version="4.1.*" />
+		<PackageReference Include="Fun.Blazor" Version="4.1.*" />
+		<PackageReference Include="Fun.Blazor.Server" Version="4.1.*" />
+		<PackageReference Include="Fun.Blazor.CustomElements" Version="4.1.*" />
+		<PackageReference Include="Fun.Blazor.Microsoft.Web" Version="9.0.*" />
+		<PackageReference Include="Fun.Blazor.Microsoft.Authorization" Version="9.0.*" />
 
 		<PackageReference Include="FFMediaToolkit" Version="4.5.1" />
 		<PackageReference Include="HeyRed.ImageSharp.Heif" Version="2.1.3" />

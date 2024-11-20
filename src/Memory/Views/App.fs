@@ -60,7 +60,8 @@ type App() as this =
                         )
                     )
                 }
-                script { src "htmx.org@1.9.9.js" }
+                script { src "htmx.org@2.0.3.js" }
+                script { src "htmx-ext-sse@2.2.2.js" }
             }
         }
     }
