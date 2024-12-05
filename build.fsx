@@ -85,7 +85,7 @@ pipeline "dev" {
         stage "server" {
             workingDir ("src" </> "Memory")
             run "dotnet clean"
-            run "dotnet watch run"
+            run "dotnet run"
         }
     }
     runIfOnlySpecified

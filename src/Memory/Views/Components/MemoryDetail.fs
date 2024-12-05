@@ -53,7 +53,7 @@ type MemoryDetail() as this =
                       }
                     | ImageFormat -> img {
                         openMetaAttr
-                        class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30 overflow-hidden"
+                        class' "object-contain w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
                         src (
                             match transformedFormat memory.FileExtension with
                             | None -> $"/memory/original/{memory.Id}"
