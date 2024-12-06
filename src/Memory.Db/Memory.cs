@@ -38,6 +38,9 @@ public class MemoryMeta {
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
 
+    public int? Width { get; set; }
+    public int? Height { get; set; }
+
     public Memory? Memory { get; set; }
 }
 

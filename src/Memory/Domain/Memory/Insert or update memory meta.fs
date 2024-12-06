@@ -238,6 +238,7 @@ type ``Insert or update memory meta handler``
                 optimizedFolder </> AppOptions.CreateOptimizedNameForImage(request.Id, ThumbnailSize.Small.ToPixel()) |> File.Exists
 
             let! meta = memoryDb.MemoryMetas.Where(fun x -> x.MemoryId = request.Id).FirstOrDefaultAsync()
+            let mutable meta = meta
 
             if not isSmallThumbnailFileExist || meta = null then
                 logger.LogInformation("Start optimize memory {id} {file}", request.Id, request.File)
@@ -279,7 +280,7 @@ type ``Insert or update memory meta handler``
 
                 if image.Metadata.ExifProfile |> isNull |> not then
                     // Update or create new meta
-                    let meta =
+                    meta <-
                         if meta = null then
                             let meta = MemoryMeta()
                             memoryDb.MemoryMetas.Add(meta) |> ignore
@@ -301,7 +302,8 @@ type ``Insert or update memory meta handler``
                             |> Task.map ignore
 
                 else if meta = null then
-                    memoryDb.MemoryMetas.Add(MemoryMeta(MemoryId = request.Id)) |> ignore
+                    meta <- MemoryMeta(MemoryId = request.Id)
+                    memoryDb.MemoryMetas.Add(meta) |> ignore
                     do! memoryDb.SaveChangesAsync() |> Task.map ignore
 
                 do! createThumbnail image ThumbnailSize.Large
@@ -309,6 +311,12 @@ type ``Insert or update memory meta handler``
                 do! createThumbnail image ThumbnailSize.Small
 
                 logger.LogInformation("Updated meta and thumbnails for memory {id} {file}", request.Id, request.File)
+
+            if meta <> null && not meta.Height.HasValue then
+                use! image = Image.LoadAsync request.File
+                meta.Width <- image.Width
+                meta.Height <- image.Height
+                memoryDb.SaveChanges() |> ignore
 
             return ()
         }

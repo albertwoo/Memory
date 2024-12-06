@@ -21,7 +21,7 @@ type MemoryDetail() as this =
 
     override _.Render() =
         html.inject (fun (mediator: IMediator, memoryDb: MemoryDbContext, cssRules: IScopedCssRules, appOptions: IOptions<AppOptions>) -> task {
-            let! memory = memoryDb.Memories.AsNoTracking().FirstOrDefaultAsync(fun x -> x.Id = this.Id)
+            let! memory = memoryDb.Memories.AsNoTracking().Include(fun x -> x.MemoryMeta).FirstOrDefaultAsync(fun x -> x.Id = this.Id)
             do! Domain.``Increase views for memory`` (this.Id) |> mediator.Send
 
             let openMetaAttr = domAttr {
@@ -53,7 +53,9 @@ type MemoryDetail() as this =
                       }
                     | ImageFormat -> img {
                         openMetaAttr
-                        class' "object-contain w-auto cursor-pointer shadow-2xl shadow-neutral-500/30"
+                        class' "object-contain max-h-full max-w-full overflow-hidden cursor-pointer shadow-2xl shadow-neutral-500/30"
+                        width memory.MemoryMeta.Width
+                        height memory.MemoryMeta.Height
                         src (
                             match transformedFormat memory.FileExtension with
                             | None -> $"/memory/original/{memory.Id}"
