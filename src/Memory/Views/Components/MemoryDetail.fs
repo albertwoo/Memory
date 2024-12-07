@@ -39,7 +39,9 @@ type MemoryDetail() as this =
                         loop
                         controls
                         autoplay
-                        class' "max-h-full w-auto cursor-pointer shadow-2xl shadow-neutral-500/30 overflow-hidden"
+                        width memory.MemoryMeta.Width
+                        height memory.MemoryMeta.Height
+                        class' "object-contain max-h-full max-w-full cursor-pointer shadow-2xl shadow-neutral-500/30 overflow-hidden"
                         poster (AppOptions.CreateOptimizedUrlForImage(this.Id) |> appOptions.Value.AppendWithVersion)
                         source {
                             type' $"video/{AppOptions.OptimizedVideoFormat}"

@@ -11,7 +11,6 @@ open Microsoft.Extensions.Logging
 open Microsoft.EntityFrameworkCore
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
-open SixLabors.ImageSharp.Formats.Jpeg
 open SixLabors.ImageSharp.Formats.Webp
 open SixLabors.ImageSharp.PixelFormats
 open SixLabors.ImageSharp.Metadata.Profiles.Exif
@@ -66,24 +65,31 @@ module private Meta =
     }
 
 
+    let getWHFromVideoStream (video: VideoStream) =
+        let shouldSwitchWH = int video.Info.Rotation % 180 <> 0
+
+        let height =
+            if shouldSwitchWH then
+                video.Info.FrameSize.Width
+            else
+                video.Info.FrameSize.Height
+        let width =
+            if shouldSwitchWH then
+                video.Info.FrameSize.Height
+            else
+                video.Info.FrameSize.Width
+
+        width, height
+
     /// Should convert any video to webm and generate image based on the first frame
     let createOptimizedVideo (ffmpegFile: string) (fromFile: string, toFile: string, toImageFile: string) =
         use mediaFile = MediaFile.Open fromFile
         let mutable height, width = 0, 0
 
         if mediaFile.HasVideo then
-            let shouldSwitchWH = int mediaFile.Video.Info.Rotation % 180 <> 0
-
-            height <-
-                if shouldSwitchWH then
-                    mediaFile.Video.Info.FrameSize.Width
-                else
-                    mediaFile.Video.Info.FrameSize.Height
-            width <-
-                if shouldSwitchWH then
-                    mediaFile.Video.Info.FrameSize.Height
-                else
-                    mediaFile.Video.Info.FrameSize.Width
+            let w, h = getWHFromVideoStream mediaFile.Video
+            width <- w
+            height <- h
 
             let imageData = mediaFile.Video.GetNextFrame()
             use image = Image.LoadPixelData<Bgr24>(imageData.Data, imageData.ImageSize.Width, imageData.ImageSize.Height)
@@ -313,9 +319,24 @@ type ``Insert or update memory meta handler``
                 logger.LogInformation("Updated meta and thumbnails for memory {id} {file}", request.Id, request.File)
 
             if meta <> null && not meta.Height.HasValue then
-                use! image = Image.LoadAsync request.File
-                meta.Width <- image.Width
-                meta.Height <- image.Height
+                match request.File with
+                | Nef ->
+                    use ctx = RawContext.OpenFile(request.File)
+                    meta.Width <- ctx.Width
+                    meta.Height <- ctx.Height
+
+                | VideoFormat ->
+                    use mediaFile = MediaFile.Open request.File
+                    if mediaFile.HasVideo then
+                        let w, h = Meta.getWHFromVideoStream mediaFile.Video
+                        meta.Width <- w
+                        meta.Height <- h
+
+                | _ ->
+                    use! image = Image.LoadAsync(imageSharpDecoderOptions.Value, request.File)
+                    meta.Width <- image.Width
+                    meta.Height <- image.Height
+
                 memoryDb.SaveChanges() |> ignore
 
             return ()
