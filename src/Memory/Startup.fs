@@ -14,6 +14,7 @@ open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Server.Kestrel.Core
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.Http.Features
+open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Configuration
@@ -33,7 +34,7 @@ services.AddOptions<AppOptions>().Bind(config.GetSection("App")).ValidateDataAnn
 
 services.Configure(fun (options: KestrelServerOptions) -> options.Limits.MaxRequestBodySize <- Int64.MaxValue)
 services.Configure(fun (options: FormOptions) -> options.MultipartBodyLengthLimit <- Int64.MaxValue)
-
+services.Configure(fun (options: ForwardedHeadersOptions) -> options.ForwardedHeaders <- ForwardedHeaders.All)
 
 services.AddHttpContextAccessor()
 services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
@@ -79,6 +80,8 @@ app.Use(fun (ctx: HttpContext) (nxt: RequestDelegate) ->
     }
     :> Threading.Tasks.Task
 )
+
+app.UseForwardedHeaders()
 
 app.UseStaticFiles()
 
