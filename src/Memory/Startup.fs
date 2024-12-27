@@ -26,9 +26,10 @@ let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
 let config = builder.Configuration
 let services = builder.Services
 
-builder.Logging.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger())
 
 builder.AddServiceDefaults()
+
+services.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).WriteTo.OpenTelemetry().CreateLogger())
 
 // Options
 services.AddOptions<AppOptions>().Bind(config.GetSection("App")).ValidateDataAnnotations()
