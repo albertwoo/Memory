@@ -38,9 +38,8 @@
 		<Compile Include="Views/Components/UploadFiles.fs" />
 		<Compile Include="Views/Pages/*.fs" />
 		<Compile Include="Views/App.fs" />
-
 		<Compile Include="Endpoints/*.fs" />
-
+		<Compile Include="Default.fs" />
 		<Compile Include="Startup.fs" />
 	</ItemGroup>
 
@@ -72,6 +71,15 @@
 		<PackageReference Include="ViewFaceCore.runtime.win.x64" Version="6.0.7" />
 		<PackageReference Include="ViewFaceCore.runtime.linux.arm64" Version="6.0.7" />
 		<PackageReference Include="ViewFaceCore.runtime.ubuntu.20.04.x64" Version="6.0.7" />
+
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.0.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+		<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>

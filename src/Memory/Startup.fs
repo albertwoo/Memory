@@ -26,8 +26,9 @@ let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
 let config = builder.Configuration
 let services = builder.Services
 
-builder.Host.UseSerilog(fun ctx _ config -> config.ReadFrom.Configuration(ctx.Configuration) |> ignore)
+builder.Logging.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger())
 
+builder.AddServiceDefaults()
 
 // Options
 services.AddOptions<AppOptions>().Bind(config.GetSection("App")).ValidateDataAnnotations()
@@ -109,6 +110,8 @@ app.Use(fun (ctx: HttpContext) (nxt: RequestDelegate) ->
 app.UseSerilogRequestLogging(fun options ->
     options.MessageTemplate <- "HTTP {RequestMethod} {UserName} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms"
 )
+
+app.MapDefaultEndpoints()
 
 app.MapMemory()
 app.MapMemoryViews()
