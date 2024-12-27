@@ -22,14 +22,13 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
 open Serilog
 
+
 let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
 let config = builder.Configuration
 let services = builder.Services
 
 
-builder.AddServiceDefaults()
-
-services.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).WriteTo.OpenTelemetry().CreateLogger())
+services.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger())
 
 // Options
 services.AddOptions<AppOptions>().Bind(config.GetSection("App")).ValidateDataAnnotations()
@@ -111,8 +110,6 @@ app.Use(fun (ctx: HttpContext) (nxt: RequestDelegate) ->
 app.UseSerilogRequestLogging(fun options ->
     options.MessageTemplate <- "HTTP {RequestMethod} {UserName} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms"
 )
-
-app.MapDefaultEndpoints()
 
 app.MapMemory()
 app.MapMemoryViews()
