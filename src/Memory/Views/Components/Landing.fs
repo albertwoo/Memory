@@ -18,10 +18,11 @@ type Landing =
                 class' "text-2xl text-center font-bold text-primary my-4"
                 appOptions.Value.Title
             }
-            a {
-                href "/account/login"
-                Icons.Fingerprint(class' = "w-6 h-6 text-primary")
-            }
+            if not appOptions.Value.DisableAuth then
+                a {
+                    href "/account/login"
+                    Icons.Fingerprint(class' = "w-6 h-6 text-primary")
+                }
         })
 
     static member SubTitle() =

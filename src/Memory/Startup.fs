@@ -15,17 +15,20 @@ open Microsoft.AspNetCore.Server.Kestrel.Core
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.AspNetCore.HttpOverrides
+open Microsoft.AspNetCore.Authorization
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
 open Serilog
+open Memory.Domain
 
 
 let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
 let config = builder.Configuration
 let services = builder.Services
+let disableAuth = config.GetValue("App:DisableAuth", false)
 
 
 services.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger())
@@ -38,8 +41,12 @@ services.Configure(fun (options: FormOptions) -> options.MultipartBodyLengthLimi
 services.Configure(fun (options: ForwardedHeadersOptions) -> options.ForwardedHeaders <- ForwardedHeaders.All)
 
 services.AddHttpContextAccessor()
+
 services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
 services.AddAuthorization()
+
+if disableAuth then
+    services.AddSingleton<IAuthorizationHandler, AllowAnonymous>() |> ignore
 
 services.AddMediatR(fun config -> config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()) |> ignore)
 
@@ -54,7 +61,6 @@ services.AddHostedService<MemoryBackgroundService>()
 
 if RuntimeInformation.IsOSPlatform OSPlatform.Windows || RuntimeInformation.IsOSPlatform OSPlatform.Linux then
     services.AddHostedService<FaceTagBackgroundService>() |> ignore
-
 
 // Frontend
 services.AddRazorComponents().AddInteractiveServerComponents()

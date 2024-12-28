@@ -13,6 +13,8 @@ type AppOptions =
         [<Required; MinLength(1)>]
         Version: string
 
+        DisableAuth: bool
+
         [<Required; MinLength(1)>]
         Theme: string
 
