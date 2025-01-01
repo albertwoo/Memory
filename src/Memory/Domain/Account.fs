@@ -47,6 +47,7 @@ type ``Reset password``(name: string, password: string, newPassword: string) =
     member _.Password = password
     member _.NewPassword = newPassword
 
+
 type AllowAnonymous() =
 
     interface IAuthorizationHandler with

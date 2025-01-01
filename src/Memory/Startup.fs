@@ -1,11 +1,7 @@
 ﻿#nowarn "0020"
 
-open Memory.Db
-open Memory.Options
-open Memory.Services
-open Memory.Endpoints
-
 open System
+open System.IO
 open System.Reflection
 open System.Security.Claims
 open System.Runtime.InteropServices
@@ -19,10 +15,15 @@ open Microsoft.AspNetCore.Authorization
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Configuration
+open Microsoft.AspNetCore.DataProtection
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
 open Serilog
+open Memory.Db
 open Memory.Domain
+open Memory.Options
+open Memory.Services
+open Memory.Endpoints
 
 
 let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
@@ -42,7 +43,13 @@ services.Configure(fun (options: ForwardedHeadersOptions) -> options.ForwardedHe
 
 services.AddHttpContextAccessor()
 
-services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
+services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(fun options ->
+        let dataProtectionDir = config.GetValue<string>("App:DataProtectionDir")
+        if not (String.IsNullOrEmpty dataProtectionDir) && Directory.Exists dataProtectionDir then
+            options.DataProtectionProvider <- DataProtectionProvider.Create(DirectoryInfo dataProtectionDir)
+    )
 services.AddAuthorization()
 
 if disableAuth then
