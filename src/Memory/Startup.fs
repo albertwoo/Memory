@@ -1,7 +1,6 @@
 ﻿#nowarn "0020"
 
 open System
-open System.IO
 open System.Reflection
 open System.Security.Claims
 open System.Runtime.InteropServices
@@ -9,15 +8,16 @@ open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Server.Kestrel.Core
 open Microsoft.AspNetCore.Authentication.Cookies
+open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.AspNetCore.HttpOverrides
 open Microsoft.AspNetCore.Authorization
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Configuration
-open Microsoft.AspNetCore.DataProtection
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
+open Microsoft.IdentityModel.Tokens
 open Serilog
 open Memory.Db
 open Memory.Domain
@@ -39,18 +39,46 @@ services.AddOptions<AppOptions>().Bind(config.GetSection("App")).ValidateDataAnn
 
 services.Configure(fun (options: KestrelServerOptions) -> options.Limits.MaxRequestBodySize <- Int64.MaxValue)
 services.Configure(fun (options: FormOptions) -> options.MultipartBodyLengthLimit <- Int64.MaxValue)
-services.Configure(fun (options: ForwardedHeadersOptions) -> options.ForwardedHeaders <- ForwardedHeaders.All)
+services.Configure(fun (options: ForwardedHeadersOptions) ->
+    options.KnownProxies.Clear()
+    options.KnownNetworks.Clear()
+    options.ForwardedHeaders <- ForwardedHeaders.All
+)
 
 services.AddHttpContextAccessor()
 
-services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(fun options ->
-        let dataProtectionDir = config.GetValue<string>("App:DataProtectionDir")
-        if not (String.IsNullOrEmpty dataProtectionDir) && Directory.Exists dataProtectionDir then
-            options.DataProtectionProvider <- DataProtectionProvider.Create(DirectoryInfo dataProtectionDir)
+let authenticate =
+    services
+        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(fun options ->
+            options.LoginPath <- "/signin"
+            options.LogoutPath <- "/signout"
+        )
+
+let jwtIssuer = config.GetValue<string>("Jwt:Issuer")
+if not (String.IsNullOrEmpty jwtIssuer) then
+    authenticate.AddJwtBearer(fun options ->
+        options.ForwardChallenge <- CookieAuthenticationDefaults.AuthenticationScheme
+        options.Authority <- jwtIssuer
+        options.RequireHttpsMetadata <- jwtIssuer.StartsWith("https")
+        options.TokenValidationParameters <-
+            TokenValidationParameters(
+                ValidateIssuer = config.GetValue("Jwt:ValidateIssuer", true),
+                ValidIssuer = jwtIssuer,
+                ValidateAudience = false,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true
+            )
     )
-services.AddAuthorization()
+    |> ignore
+
+services.AddAuthorization(fun options ->
+    options.DefaultPolicy <-
+        AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build()
+)
 
 if disableAuth then
     services.AddSingleton<IAuthorizationHandler, AllowAnonymous>() |> ignore
