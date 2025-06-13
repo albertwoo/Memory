@@ -11,16 +11,12 @@ public class MemoryDbContext : DbContext {
 
     public MemoryDbContext(DbContextOptions<MemoryDbContext> options) : base(options) { }
 
-    public DbSet<User> Users { get; set; }
     public DbSet<Memory> Memories { get; set; }
     public DbSet<MemoryMeta> MemoryMetas { get; set; }
     public DbSet<MemoryTag> MemoryTags { get; set; }
     public DbSet<Tag> Tags { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder) {
-        builder.Entity<User>().HasKey(x => x.Id);
-
-
         builder.Entity<Memory>().HasKey(x => x.Id);
         
         builder.Entity<Memory>().HasIndex(x => x.CreationTime);

@@ -3,13 +3,11 @@ namespace Memory.Views
 open System.IO
 open System.Reflection
 open Microsoft.Extensions.Options
+open Microsoft.AspNetCore.Components
 open Microsoft.AspNetCore.Components.Web
-open Microsoft.AspNetCore.Components.Authorization
 open Fun.Blazor
 open Memory.Options
-open Memory.Views
 open Memory.Views.Components
-open Microsoft.AspNetCore.Components
 
 
 type App() as this =
@@ -53,13 +51,7 @@ type App() as this =
                 }
                 Router'' {
                     AppAssembly(Assembly.GetExecutingAssembly())
-                    Found(fun routeData ->
-                        html.blazor (
-                            ComponentAttrBuilder<AuthorizeRouteView>()
-                                .Add((fun x -> x.RouteData), routeData)
-                                .Add((fun x -> x.NotAuthorized), html.renderFragment (fun _ -> html.blazor<Pages.LoginPage> ()))
-                        )
-                    )
+                    Found(fun routeData -> RouteView'' { RouteData routeData })
                 }
                 script { src "htmx.org@2.0.3.js" }
                 script { src "htmx-ext-sse@2.2.2.js" }

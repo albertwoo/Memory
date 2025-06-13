@@ -2,18 +2,14 @@ namespace Memory.Options
 
 open System
 open System.IO
-open Microsoft.Extensions.Hosting
 open System.ComponentModel.DataAnnotations
-
-type AppUser = { Name: string; Password: string }
+open Microsoft.Extensions.Hosting
 
 [<CLIMutable>]
 type AppOptions =
     {
         [<Required; MinLength(1)>]
         Version: string
-
-        DisableAuth: bool
 
         [<Required; MinLength(1)>]
         Theme: string
@@ -26,9 +22,6 @@ type AppOptions =
         SubTitleLine1_3: string
         [<Required>]
         SubTitleLine2_1: string
-
-        [<Required; MinLength(1)>]
-        Users: AppUser[]
 
         [<Required; MinLength(1)>]
         SourceFolders: string[]

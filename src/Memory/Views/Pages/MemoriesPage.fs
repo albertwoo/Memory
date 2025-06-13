@@ -4,7 +4,6 @@ open System
 open System.Linq
 open Microsoft.AspNetCore.Components
 open Microsoft.AspNetCore.Components.Web
-open Microsoft.AspNetCore.Authorization
 open Microsoft.Extensions.Options
 open Microsoft.EntityFrameworkCore
 open MediatR
@@ -19,7 +18,6 @@ open Memory.Views.Components
 
 
 [<Route "/">]
-[<Authorize>]
 type MemoriesPage() as this =
     inherit FunComponent()
 

@@ -2,22 +2,17 @@
 
 open System
 open System.Reflection
-open System.Security.Claims
 open System.Runtime.InteropServices
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Server.Kestrel.Core
-open Microsoft.AspNetCore.Authentication.Cookies
-open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.Http.Features
 open Microsoft.AspNetCore.HttpOverrides
-open Microsoft.AspNetCore.Authorization
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Options
 open Microsoft.Extensions.Configuration
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.EntityFrameworkCore
-open Microsoft.IdentityModel.Tokens
 open Serilog
 open Memory.Db
 open Memory.Domain
@@ -29,8 +24,6 @@ open Memory.Endpoints
 let builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs())
 let config = builder.Configuration
 let services = builder.Services
-let disableAuth = config.GetValue("App:DisableAuth", false)
-
 
 services.AddSerilog(LoggerConfiguration().ReadFrom.Configuration(builder.Configuration).CreateLogger())
 
@@ -46,42 +39,6 @@ services.Configure(fun (options: ForwardedHeadersOptions) ->
 )
 
 services.AddHttpContextAccessor()
-
-let authenticate =
-    services
-        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(fun options ->
-            options.LoginPath <- "/signin"
-            options.LogoutPath <- "/signout"
-        )
-
-let jwtIssuer = config.GetValue<string>("Jwt:Issuer")
-if not (String.IsNullOrEmpty jwtIssuer) then
-    authenticate.AddJwtBearer(fun options ->
-        options.ForwardChallenge <- CookieAuthenticationDefaults.AuthenticationScheme
-        options.Authority <- jwtIssuer
-        options.RequireHttpsMetadata <- jwtIssuer.StartsWith("https")
-        options.TokenValidationParameters <-
-            TokenValidationParameters(
-                ValidateIssuer = config.GetValue("Jwt:ValidateIssuer", true),
-                ValidIssuer = jwtIssuer,
-                ValidateAudience = false,
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true
-            )
-    )
-    |> ignore
-
-services.AddAuthorization(fun options ->
-    options.DefaultPolicy <-
-        AuthorizationPolicyBuilder()
-            .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme, JwtBearerDefaults.AuthenticationScheme)
-            .RequireAuthenticatedUser()
-            .Build()
-)
-
-if disableAuth then
-    services.AddSingleton<IAuthorizationHandler, AllowAnonymous>() |> ignore
 
 services.AddMediatR(fun config -> config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()) |> ignore)
 
@@ -127,30 +84,10 @@ app.UseForwardedHeaders()
 
 app.UseStaticFiles()
 
-app.UseAuthentication().UseAuthorization()
-
 // Must put after auth middleware
 app.UseAntiforgery()
 
-app.Use(fun (ctx: HttpContext) (nxt: RequestDelegate) ->
-    task {
-        // Set user name for logging
-        if ctx.User <> null && ctx.User.Claims <> null then
-            let userName =
-                ctx.User.Claims
-                |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                |> Option.map (fun x -> x.Value)
-                |> Option.defaultValue "Unknown"
-            Context.LogContext.PushProperty("UserName", userName)
-
-        do! nxt.Invoke ctx
-    }
-    :> Threading.Tasks.Task
-)
-
-app.UseSerilogRequestLogging(fun options ->
-    options.MessageTemplate <- "HTTP {RequestMethod} {UserName} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms"
-)
+app.UseSerilogRequestLogging()
 
 app.MapMemory()
 app.MapMemoryViews()

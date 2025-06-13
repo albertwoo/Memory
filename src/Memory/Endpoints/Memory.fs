@@ -39,7 +39,6 @@ type Memory =
                         return Results.NotFound()
                 })
             )
-            .RequireAuthorization()
         |> ignore
 
         app
@@ -67,5 +66,4 @@ type Memory =
                             )
                 })
             )
-            .RequireAuthorization()
         |> ignore

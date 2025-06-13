@@ -3,13 +3,11 @@ namespace Memory.Views.Pages
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Components
 open Microsoft.AspNetCore.Components.Web
-open Microsoft.AspNetCore.Authorization
 open Fun.Blazor
 open Memory.Options
 open Memory.Views.Components
 
 [<Route "/memory/{id:long}">]
-[<Authorize>]
 type MemoryDetailPage() as this =
     inherit FunComponent()
 
